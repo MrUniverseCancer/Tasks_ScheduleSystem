@@ -1,0 +1,49 @@
+<mxfile host="Electron" modified="2024-08-30T10:10:53.914Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.8 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="ZD6o3AnlKXlDx0Y7iAZk" version="24.4.8" type="device">
+  <diagram name="第 1 页" id="Tfqh1Ez-M4g51fIacER9">
+    <mxGraphModel dx="2048" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6S-noL3J_7gRNndmAYHi-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="750" height="410" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="190" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-3" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-4" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-5" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="290" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-6" value="按照优先度排序的任务词条&lt;div&gt;相同于主界面的表示&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-170" y="175" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-7" value="交换台" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="215" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-8" value="生成计划" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="430" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-9" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="750" height="480" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-10" value="计划" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="750" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-11" value="日期&lt;br&gt;计划A&lt;div&gt;计划B&lt;/div&gt;&lt;div&gt;……&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="670" width="260" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-12" value="日期&lt;br&gt;计划A&lt;div&gt;计划B&lt;/div&gt;&lt;div&gt;……&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="670" width="260" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="6S-noL3J_7gRNndmAYHi-13" value="&lt;font style=&quot;font-size: 37px;&quot;&gt;×&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="590" width="70" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
