@@ -1,13 +1,19 @@
 package org.example.GUI_design;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
+import javafx.util.Duration;
 
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class task_showing {
 
@@ -16,13 +22,22 @@ public class task_showing {
     private Main_Page main_page;
     private DoubleBinding widthProperty;
     private DoubleBinding heightProperty;
+    private four_element four_element;
     private double columnratio = 9.0;
     private double rowratio = 9.0;
+    private List<String []> tasks1;
+    private List<String []> tasks2;
+    private List<String []> tasks3;
+    private List<String []> tasks4;
 
     public task_showing(Main main, Main_Page main_page){
         this.main = main;
         this.main_page = main_page;
-
+        this.four_element = new four_element();
+        tasks1 = new ArrayList<String[]>();
+        tasks2 = new ArrayList<String[]>();
+        tasks3 = new ArrayList<String[]>();
+        tasks4 = new ArrayList<String[]>();
         createGridPane();
     }
 
@@ -74,7 +89,50 @@ public class task_showing {
         ImageView imageView = new ImageView(image);
         imageView.fitWidthProperty().bind(gridPane.widthProperty().divide(columnratio)); // 设置图片宽度
         imageView.fitHeightProperty().bind(gridPane.heightProperty().divide(rowratio)); // 设置图片高度
+
+
         pane.getChildren().add(imageView);
+
+        // 创建缩放和旋转转换
+        Scale scale = new Scale(1.0, 1.0, imageView.getFitWidth() / 2, imageView.getFitHeight() / 2);
+        Rotate rotate = new Rotate(0, imageView.getFitWidth() / 2, imageView.getFitHeight() / 2);
+
+        // 应用转换到 imageView
+        imageView.getTransforms().addAll(scale, rotate);
+
+        // 创建 Timeline 用于放大和旋转
+        Timeline timelineEnter = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        e -> {
+                            imageView.setRotate(180);
+                        }),
+                new KeyFrame(Duration.millis(300))
+        );
+
+        Timeline timelineExit = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        e -> {
+                            imageView.setRotate(0);
+                        }),
+                new KeyFrame(Duration.millis(300))
+        );
+
+        // 设置鼠标进入事件
+        imageView.setOnMouseEntered(event -> {
+            timelineEnter.playFromStart();
+            System.out.println("Entered");
+        });
+
+        // 设置鼠标离开事件
+        imageView.setOnMouseExited(event -> {
+            timelineExit.playFromStart();
+            System.out.println("Exited");
+        });
+
+        imageView.setOnMouseClicked(event -> {
+                System.out.println("Clicked");
+            }
+        );
 
 
         return pane;
@@ -141,9 +199,23 @@ public class task_showing {
 
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
-        // Optionally, add a button or other controls to each pane
-        Button button = new Button("紧迫且重要");
-        pane.getChildren().add(button);
+//        // Optionally, add a button or other controls to each pane
+//        Button button = new Button("紧迫且重要");
+//        pane.getChildren().add(button);
+        getTasks(2);
+        List<String[]> tasks = tasks2;
+        for (String[] temp_task : tasks){
+            float x = Float.parseFloat(temp_task[9]);
+            float y = Float.parseFloat(temp_task[10]);
+            double ratio_x = (100 - x) / 50.0;
+            double ratio_y = (100 - y) / 50.0;
+            Pane temp_pane = getelement(3);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y));
+            pane.getChildren().add(temp_pane);
+        }
+
+
 
         return pane;
     }
@@ -184,6 +256,77 @@ public class task_showing {
         pane.getChildren().add(button);
 
         return pane;
+    }
+
+    public List<String []> getTasks(){
+        return this.main.getReadTasksFromCsv().readtasks();
+    }
+
+    public void getTasks(int i){
+        // 笛卡尔象限2134代表参数i的2134的排列d
+        List<String []> all = getTasks();
+        List<String []> result = new ArrayList<String []>();
+
+        int length = all.size();
+        for(int j = 0; j < length; j++){
+            float fact_importtance = 0.0f;
+            float fact_urgency     = 0.0f;
+            try {
+                // 将字符串转换为 float
+                fact_importtance = Float.parseFloat(all.get(j)[9]);
+                fact_urgency     = Float.parseFloat(all.get(j)[10]);
+            } catch (NumberFormatException e) {
+                // 捕捉转换失败的异常
+                System.out.println("无法将字符串转换为浮点数: " + e.getMessage());
+            }
+            switch (i) {
+                case 1:
+                    if (fact_importtance < 50.0 && fact_urgency >= 50.0) {
+                        result.add(all.get(j));
+                    }
+                    break;
+                case 2:
+                    if (fact_importtance >= 50.0 && fact_urgency >= 50.0) {
+                        result.add(all.get(j));
+                    }
+                    break;
+                case 3:
+                    if (fact_importtance >= 50.0 && fact_urgency < 50.0) {
+                        result.add(all.get(j));
+                    }
+                    break;
+                case 4:
+                    if (fact_importtance < 50.0 && fact_urgency < 50.0) {
+                        result.add(all.get(j));
+                    }
+                    break;
+            }
+        }
+        switch (i){
+            case 1:
+                tasks1 = result;
+                break;
+            case 2:
+                tasks2 = result;
+                break;
+            case 3:
+                tasks3 = result;
+                break;
+            case 4:
+                tasks4 = result;
+                break;
+        }
+    }
+
+    public Pane getelement(int i){
+        Pane fig = four_element.create_fig(i);
+        double width = gridPane.widthProperty().doubleValue() * (columnratio-1)/2 / columnratio;    // 宽度
+        double height = gridPane.heightProperty().doubleValue() * (rowratio-1)/2 / rowratio;    // 高度
+//        fig.prefHeightProperty().bind((width < height) ? gridPane.widthProperty().divide(209*columnratio).multiply(columnratio-1) : gridPane.heightProperty().divide(200*rowratio).multiply(rowratio-1)); // 设置图片高度
+//        fig.prefWidthProperty().bind((width < height) ? gridPane.widthProperty().divide(209*columnratio).multiply(columnratio-1) : gridPane.heightProperty().divide(200*rowratio).multiply(rowratio-1)); // 设置图片宽度
+        fig.prefHeightProperty().bind(gridPane.heightProperty().divide(200)); // 设置图片高度
+        fig.prefWidthProperty().bind(gridPane.widthProperty().divide(209)); // 设置图片宽度
+        return fig;
     }
 
 
