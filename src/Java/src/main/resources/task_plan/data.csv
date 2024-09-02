@@ -1,0 +1,11 @@
+TaskName,LeftTime,ImportanceLevel,TaskConsuming,PunishLevel,PreferenceLevel,DifficultyLevel,BufferbtwTasks,singalTaskTime,FactImportance,FactUrgency
+NULL,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+睡觉前补完数学作业,2,85,1.2,50,80,70,0,2,90,95
+补4节网课,30,60,6,20,30,70,1,1.5,40,60
+购买生活物资,18,50,0.5,20,80,0,0,0.5,40,30
+GamePlaying,15,50,3,10,90,0,0,1,30,30
+Runing,4,80,2,0,95,80,0,2,90,60
+Reciting,4,80,1,0,65,80,0,1,85,60
+Python Project,10,40,4,80,70,50,1,2,80,80
+Read Book,8,30,2,70,60,40,0,2,40,50
+Cook Dinner,5,45,1,30,40,20,0,1,50,65

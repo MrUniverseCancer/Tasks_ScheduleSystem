@@ -1,0 +1,1 @@
+copy .\data.csv ..\Java\src\main\resources\task_plan\

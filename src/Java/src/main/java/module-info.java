@@ -1,9 +1,9 @@
 module org.example.java {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
-    opens org.example.java to javafx.fxml;
-    exports org.example.java;
-    exports GUI_design to javafx.graphics;
+    exports org.example.GUI_design to javafx.graphics;
+    exports org.example.GUI_design.generalData to javafx.graphics;
 }
