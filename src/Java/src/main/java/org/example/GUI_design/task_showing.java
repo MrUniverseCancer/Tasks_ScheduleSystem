@@ -15,6 +15,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class task_showing {
 
@@ -31,6 +32,7 @@ public class task_showing {
     private List<String []> tasks3;
     private List<String []> tasks4;
     private Random rand = new Random();
+    private double dis = 8;
 
     public task_showing(Main main, Main_Page main_page){
         this.main = main;
@@ -206,19 +208,7 @@ public class task_showing {
 //        pane.getChildren().add(button);
         getTasks(2);
         List<String[]> tasks = tasks2;
-        for (String[] temp_task : tasks){
-            float x = Float.parseFloat(temp_task[9]);
-            float y = Float.parseFloat(temp_task[10]);
-            double ratio_x = (100 - x) / 50.0;
-            double ratio_y = (100 - y) / 50.0;
-            Pane temp_pane = getelement(rand.nextInt(3) + 2);
-            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
-            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
-            pane.getChildren().add(temp_pane);
-        }
-
-
-
+        add_element(pane, tasks, 2, 2);
         return pane;
     }
     Pane pane_2_3(){
@@ -229,17 +219,7 @@ public class task_showing {
 
         getTasks(1);
         List<String[]> tasks = tasks1;
-        for (String[] temp_task : tasks){
-            float x = Float.parseFloat(temp_task[9]);
-            float y = Float.parseFloat(temp_task[10]);
-            double ratio_x = (50 - x) / 50.0;
-            double ratio_y = (100 - y) / 50.0;
-            Pane temp_pane = getelement(rand.nextInt(3) + 2);
-            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
-            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
-            pane.getChildren().add(temp_pane);
-        }
-
+        add_element(pane, tasks, 1, 2);
         return pane;
     }
 
@@ -251,17 +231,7 @@ public class task_showing {
 
         getTasks(3);
         List<String[]> tasks = tasks3;
-        for (String[] temp_task : tasks){
-            float x = Float.parseFloat(temp_task[9]);
-            float y = Float.parseFloat(temp_task[10]);
-            double ratio_x = (100 - x) / 50.0;
-            double ratio_y = (50 - y) / 50.0;
-            Pane temp_pane = getelement(rand.nextInt(3) + 2);
-            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
-            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
-            pane.getChildren().add(temp_pane);
-        }
-
+        add_element(pane, tasks, 2, 1);
         return pane;
     }
 
@@ -273,17 +243,7 @@ public class task_showing {
 
         getTasks(4);
         List<String[]> tasks = tasks4;
-        for (String[] temp_task : tasks){
-            float x = Float.parseFloat(temp_task[9]);
-            float y = Float.parseFloat(temp_task[10]);
-            double ratio_x = (50 - x) / 50.0;
-            double ratio_y = (50 - y) / 50.0;
-            Pane temp_pane = getelement(rand.nextInt(3) + 2);
-            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
-            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
-            pane.getChildren().add(temp_pane);
-        }
-
+        add_element(pane, tasks, 1, 1);
         return pane;
     }
 
@@ -349,9 +309,6 @@ public class task_showing {
 
     public Pane getelement(int i){
         Pane fig = four_element.create_fig(i);
-        fig.setOnMouseClicked(e -> {
-            System.out.println("Right");
-        });
         // 创建 Timeline 用于放大和旋转
         double ratio = 1.2;
         Timeline timelineEnter = new Timeline(
@@ -386,6 +343,72 @@ public class task_showing {
             System.out.println("Exited");
         });
         return fig;
+    }
+
+    public int optimize(double ratio){
+        //边界支持
+        if (ratio < 1/50.0){
+            // 离上面/左面太近，减的少一点
+            return -1;
+        }
+        if (ratio > 49/50.0){
+            // 离下面/右面太近，减的多一点
+            return 1;
+        }
+        return 0;
+    }
+
+    public void add_element(Pane pane, List<String[]> tasks, int num_x, int num_y){
+        for (String[] temp_task : tasks){
+            task_card card = new task_card(temp_task);
+            float x = Float.parseFloat(temp_task[9]);
+            
+            float y = Float.parseFloat(temp_task[10]);
+            double ratio_x = (50*num_x - x) / 50.0;
+            double ratio_y = (50*num_y - y) / 50.0;
+            // 边界支持
+            int optimize_x = 0;
+            int optimize_y = 0;
+            optimize_x = optimize(ratio_x);
+            optimize_y = optimize(ratio_y);
+            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15+optimize_x*dis));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15+optimize_y*dis));
+            AtomicBoolean i = new AtomicBoolean(false);
+            Pane temp_card = card.getCard();
+            temp_card.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).add((ratio_x > 0.5 ? -180 : 15)));
+            temp_pane.setOnMouseClicked(event -> {
+                // 第一次点击展示任务卡片
+                // 第二次点击取消任务卡片
+                System.out.println("Clicked");
+                if(i.get()){
+                    // 删除任务卡片
+                    pane.getChildren().remove(temp_card);
+                    i.set(false);
+                }
+                else {
+                    // 添加任务卡片
+                    pane.getChildren().add(temp_card);
+                    i.set(true);
+                }
+            });
+            // Find the first Button and add event handler
+            for (var node : temp_card.getChildren()) {
+                if (node instanceof Button) {
+                    System.out.println("Button found!");
+                    Button exit_Button = (Button) node;
+                    exit_Button.setOnAction(event -> {
+//                        System.out.println("First button clicked!");
+                        // 删除任务卡片
+                        pane.getChildren().remove(temp_card);
+                        i.set(false);
+                    });
+                    break; // Only handle the first Button
+                }
+            }
+            pane.getChildren().add(temp_pane);
+        }
+        return;
     }
 
 
