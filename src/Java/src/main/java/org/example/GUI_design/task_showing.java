@@ -5,6 +5,7 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -22,8 +23,6 @@ public class task_showing {
     private GridPane gridPane;
     private Main main;
     private Main_Page main_page;
-    private DoubleBinding widthProperty;
-    private DoubleBinding heightProperty;
     private four_element four_element;
     private double columnratio = 9.0;
     private double rowratio = 9.0;
@@ -33,6 +32,14 @@ public class task_showing {
     private List<String []> tasks4;
     private Random rand = new Random();
     private double dis = 8;
+    private Pane pane22_1;
+    private Pane pane23_1;
+    private Pane pane32_1;
+    private Pane pane33_1;
+    private Pane pane22_2;
+    private Pane pane23_2;
+    private Pane pane32_2;
+    private Pane pane33_2;
 
     public task_showing(Main main, Main_Page main_page){
         this.main = main;
@@ -75,11 +82,31 @@ public class task_showing {
         gridPane.add(pane_1_2(), 1, 0);
         gridPane.add(pane_1_3(), 2, 0);
         gridPane.add(pane_2_1(), 0, 1);
-        gridPane.add(pane_2_2(), 1, 1);
-        gridPane.add(pane_2_3(), 2, 1);
         gridPane.add(pane_3_1(), 0, 2);
-        gridPane.add(pane_3_2(), 1, 2);
-        gridPane.add(pane_3_3(), 2, 2);
+        pane22_1 = pane_2_2(0);
+        pane23_1 = pane_2_3(0);
+        pane32_1 = pane_3_2(0);
+        pane33_1 = pane_3_3(0);
+
+        pane22_2 = pane_2_2(1);
+        pane23_2 = pane_2_3(1);
+        pane32_2 = pane_3_2(1);
+        pane33_2 = pane_3_3(1);
+
+        pane22_2.setVisible(false);
+        pane23_2.setVisible(false);
+        pane32_2.setVisible(false);
+        pane33_2.setVisible(false);
+        
+        gridPane.add(pane22_1, 1, 1);
+        gridPane.add(pane23_1, 2, 1);
+        gridPane.add(pane32_1, 1, 2); // 验证发现，第一个参数是列，第二个参数是行
+        gridPane.add(pane33_1, 2, 2);
+        gridPane.add(pane22_2, 1, 1);
+        gridPane.add(pane23_2, 2, 1);
+        gridPane.add(pane32_2, 1, 2);
+        gridPane.add(pane33_2, 2, 2);
+
     }
 
     Pane pane_1_1(){
@@ -135,6 +162,26 @@ public class task_showing {
 
         imageView.setOnMouseClicked(event -> {
                 System.out.println("Clicked");
+                if(pane22_1.isVisible()){
+                    pane22_1.setVisible(false);
+                    pane23_1.setVisible(false);
+                    pane32_1.setVisible(false);
+                    pane33_1.setVisible(false);
+                    pane22_2.setVisible(true);
+                    pane23_2.setVisible(true);
+                    pane32_2.setVisible(true);
+                    pane33_2.setVisible(true);
+                }
+                else {
+                    pane22_1.setVisible(true);
+                    pane23_1.setVisible(true);
+                    pane32_1.setVisible(true);
+                    pane33_1.setVisible(true);
+                    pane22_2.setVisible(false);
+                    pane23_2.setVisible(false);
+                    pane32_2.setVisible(false);
+                    pane33_2.setVisible(false);
+                }
             }
         );
 
@@ -197,21 +244,25 @@ public class task_showing {
         return pane;
     }
 
-    Pane pane_2_2(){
+    Pane pane_2_2(int i){
         // 重要*紧迫
         Pane pane = new Pane();
 
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
-//        // Optionally, add a button or other controls to each pane
-//        Button button = new Button("紧迫且重要");
-//        pane.getChildren().add(button);
         getTasks(2);
         List<String[]> tasks = tasks2;
-        add_element(pane, tasks, 2, 2);
+        switch (i){
+            case 0:
+                add_element(pane, tasks, 2, 2);
+                break;
+            case 1:
+                add_card(pane, tasks);
+                break;
+        }
         return pane;
     }
-    Pane pane_2_3(){
+    Pane pane_2_3(int i){
         // 不重要*紧迫
         Pane pane = new Pane();
 
@@ -219,11 +270,18 @@ public class task_showing {
 
         getTasks(1);
         List<String[]> tasks = tasks1;
-        add_element(pane, tasks, 1, 2);
+        switch (i){
+            case 0:
+                add_element(pane, tasks, 1,2);
+                break;
+            case 1:
+                add_card(pane, tasks);
+                break;
+        }
         return pane;
     }
 
-    Pane pane_3_2(){
+    Pane pane_3_2(int i){
         // 重要*不紧迫
         Pane pane = new Pane();
 
@@ -231,11 +289,18 @@ public class task_showing {
 
         getTasks(3);
         List<String[]> tasks = tasks3;
-        add_element(pane, tasks, 2, 1);
+        switch (i){
+            case 0:
+                add_element(pane, tasks, 2,1);
+                break;
+            case 1:
+                add_card(pane, tasks);
+                break;
+        }
         return pane;
     }
 
-    Pane pane_3_3(){
+    Pane pane_3_3(int i){
         // 不重要*不紧迫
         Pane pane = new Pane();
 
@@ -243,7 +308,14 @@ public class task_showing {
 
         getTasks(4);
         List<String[]> tasks = tasks4;
-        add_element(pane, tasks, 1, 1);
+        switch (i){
+            case 0:
+                add_element(pane, tasks, 1,1);
+                break;
+            case 1:
+                add_card(pane, tasks);
+                break;
+        }
         return pane;
     }
 
@@ -282,6 +354,7 @@ public class task_showing {
                 case 3:
                     if (fact_importtance >= 50.0 && fact_urgency < 50.0) {
                         result.add(all.get(j));
+                        System.out.println("yes");
                     }
                     break;
                 case 4:
@@ -369,13 +442,13 @@ public class task_showing {
             // 边界支持
             int optimize_x = 0;
             int optimize_y = 0;
-            optimize_x = optimize(ratio_x);
+            optimize_x  = optimize(ratio_x);
             optimize_y = optimize(ratio_y);
             Pane temp_pane = getelement(rand.nextInt(3) + 2);
             temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15+optimize_x*dis));
             temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15+optimize_y*dis));
             AtomicBoolean i = new AtomicBoolean(false);
-            Pane temp_card = card.getCard();
+            Pane temp_card = card.getCard1();
             temp_card.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).add((ratio_x > 0.5 ? -180 : 15)));
             temp_pane.setOnMouseClicked(event -> {
                 // 第一次点击展示任务卡片
@@ -395,7 +468,6 @@ public class task_showing {
             // Find the first Button and add event handler
             for (var node : temp_card.getChildren()) {
                 if (node instanceof Button) {
-                    System.out.println("Button found!");
                     Button exit_Button = (Button) node;
                     exit_Button.setOnAction(event -> {
 //                        System.out.println("First button clicked!");
@@ -408,6 +480,62 @@ public class task_showing {
             }
             pane.getChildren().add(temp_pane);
         }
+        return;
+    }
+
+    public void add_card(Pane pane, List<String[]> tasks) {
+        // 创建一个 VBox 用于垂直排列按钮
+        VBox vbox = new VBox(10); // 10 是按钮之间的间距
+
+        // 创建并添加多个按钮到 VBox
+        for(String[] temp_task : tasks){
+            task_card card = new task_card(temp_task);
+            Button fact_card = card.getCard2();
+            vbox.getChildren().add(fact_card);
+
+            Pane temp_card = card.getCard1();
+            temp_card.layoutXProperty().bind(pane.widthProperty().multiply(0.6));
+            AtomicBoolean i = new AtomicBoolean(false);
+            fact_card.setOnMouseClicked(event -> {
+                // 第一次点击展示任务卡片
+                // 第二次点击取消任务卡片
+                System.out.println("Clicked");
+                if(i.get()){
+                    // 删除任务卡片
+                    pane.getChildren().remove(temp_card);
+                    i.set(false);
+                }
+                else {
+                    // 添加任务卡片
+                    pane.getChildren().add(temp_card);
+                    i.set(true);
+                }
+            });
+            // Find the first Button and add event handler
+            for (var node : temp_card.getChildren()) {
+                if (node instanceof Button) {
+                    Button exit_Button = (Button) node;
+                    exit_Button.setOnAction(event -> {
+//                        System.out.println("First button clicked!");
+                        // 删除任务卡片
+                        pane.getChildren().remove(temp_card);
+                        i.set(false);
+                    });
+                    break; // Only handle the first Button
+                }
+            }
+        }
+
+        // 创建一个 ScrollPane，并将 vbox 添加到 ScrollPane 中
+        ScrollPane scrollPane = new ScrollPane(vbox);
+
+        StackPane stackPane1 = new StackPane();
+        stackPane1.getChildren().add(scrollPane);
+        stackPane1.prefHeightProperty().bind(pane.heightProperty());
+        stackPane1.prefWidthProperty().bind(pane.widthProperty().multiply(0.6));
+        stackPane1.layoutXProperty().bind(pane.widthProperty().multiply(0.2));
+
+        pane.getChildren().add(stackPane1);
         return;
     }
 
