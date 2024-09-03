@@ -14,6 +14,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class task_showing {
 
@@ -29,6 +30,7 @@ public class task_showing {
     private List<String []> tasks2;
     private List<String []> tasks3;
     private List<String []> tasks4;
+    private Random rand = new Random();
 
     public task_showing(Main main, Main_Page main_page){
         this.main = main;
@@ -209,9 +211,9 @@ public class task_showing {
             float y = Float.parseFloat(temp_task[10]);
             double ratio_x = (100 - x) / 50.0;
             double ratio_y = (100 - y) / 50.0;
-            Pane temp_pane = getelement(3);
-            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x));
-            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y));
+            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
             pane.getChildren().add(temp_pane);
         }
 
@@ -225,9 +227,18 @@ public class task_showing {
 
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
-        // Optionally, add a button or other controls to each pane
-        Button button = new Button("不紧迫且重要");
-        pane.getChildren().add(button);
+        getTasks(1);
+        List<String[]> tasks = tasks1;
+        for (String[] temp_task : tasks){
+            float x = Float.parseFloat(temp_task[9]);
+            float y = Float.parseFloat(temp_task[10]);
+            double ratio_x = (50 - x) / 50.0;
+            double ratio_y = (100 - y) / 50.0;
+            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
+            pane.getChildren().add(temp_pane);
+        }
 
         return pane;
     }
@@ -238,9 +249,18 @@ public class task_showing {
 
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
-        // Optionally, add a button or other controls to each pane
-        Button button = new Button("紧迫且不重要");
-        pane.getChildren().add(button);
+        getTasks(3);
+        List<String[]> tasks = tasks3;
+        for (String[] temp_task : tasks){
+            float x = Float.parseFloat(temp_task[9]);
+            float y = Float.parseFloat(temp_task[10]);
+            double ratio_x = (100 - x) / 50.0;
+            double ratio_y = (50 - y) / 50.0;
+            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
+            pane.getChildren().add(temp_pane);
+        }
 
         return pane;
     }
@@ -251,9 +271,18 @@ public class task_showing {
 
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
-        // Optionally, add a button or other controls to each pane
-        Button button = new Button("不紧迫且不重要");
-        pane.getChildren().add(button);
+        getTasks(4);
+        List<String[]> tasks = tasks4;
+        for (String[] temp_task : tasks){
+            float x = Float.parseFloat(temp_task[9]);
+            float y = Float.parseFloat(temp_task[10]);
+            double ratio_x = (50 - x) / 50.0;
+            double ratio_y = (50 - y) / 50.0;
+            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15));
+            temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15));
+            pane.getChildren().add(temp_pane);
+        }
 
         return pane;
     }
@@ -320,12 +349,42 @@ public class task_showing {
 
     public Pane getelement(int i){
         Pane fig = four_element.create_fig(i);
-        double width = gridPane.widthProperty().doubleValue() * (columnratio-1)/2 / columnratio;    // 宽度
-        double height = gridPane.heightProperty().doubleValue() * (rowratio-1)/2 / rowratio;    // 高度
-//        fig.prefHeightProperty().bind((width < height) ? gridPane.widthProperty().divide(209*columnratio).multiply(columnratio-1) : gridPane.heightProperty().divide(200*rowratio).multiply(rowratio-1)); // 设置图片高度
-//        fig.prefWidthProperty().bind((width < height) ? gridPane.widthProperty().divide(209*columnratio).multiply(columnratio-1) : gridPane.heightProperty().divide(200*rowratio).multiply(rowratio-1)); // 设置图片宽度
-        fig.prefHeightProperty().bind(gridPane.heightProperty().divide(200)); // 设置图片高度
-        fig.prefWidthProperty().bind(gridPane.widthProperty().divide(209)); // 设置图片宽度
+        fig.setOnMouseClicked(e -> {
+            System.out.println("Right");
+        });
+        // 创建 Timeline 用于放大和旋转
+        double ratio = 1.2;
+        Timeline timelineEnter = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        e -> {
+                            fig.setScaleX(ratio);
+                            fig.setScaleY(ratio);
+//                            fig.setRotate(180);
+                        }),
+                new KeyFrame(Duration.millis(300))
+        );
+
+        Timeline timelineExit = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        e -> {
+                            fig.setScaleX(1.0);
+                            fig.setScaleY(1.0);
+//                            fig.setRotate(0);
+                        }),
+                new KeyFrame(Duration.millis(300))
+        );
+
+        // 设置鼠标进入事件
+        fig.setOnMouseEntered(event -> {
+            timelineEnter.playFromStart();
+            System.out.println("Entered");
+        });
+
+        // 设置鼠标离开事件
+        fig.setOnMouseExited(event -> {
+            timelineExit.playFromStart();
+            System.out.println("Exited");
+        });
         return fig;
     }
 
