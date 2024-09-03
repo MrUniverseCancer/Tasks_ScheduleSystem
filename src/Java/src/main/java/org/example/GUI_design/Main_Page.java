@@ -9,7 +9,8 @@ public class Main_Page {
 
     private Scene scene;
     private Main main;
-    private Pane root;
+    private Pane MainPage;
+    private Pane TaskPage;
 
     public Main_Page(Main main) {
         this.main = main;
@@ -17,24 +18,47 @@ public class Main_Page {
     }
 
     public void createScene() {
-
-        root = getRoot();
-        this.scene = new Scene(root);
-
+        MainPage = getMainPage();
+        this.scene = new Scene(MainPage);
+        TaskPage = getTaskPage();
     }
 
-    public Pane getRoot(){
-        // Main Page About
+    public Pane getMainPage(){
+        // Task Page About
         BorderPane root = new BorderPane();
         root.setPrefSize(getLength(), getWidth());
-        // 设置主页面的菜单
-        Menu_MainPage menu_mainPage = new Menu_MainPage(main);
-        root.setTop(menu_mainPage.getMenuBar());
+        // 设置任务页面的菜单
+        Menu_create menu_create = new Menu_create(main);
+        root.setTop(menu_create.getMainMenuBar());
 
         // 设置主页面展示的任务
         task_showing task_showing = new task_showing(main, this);
         root.setCenter(task_showing.getGridPane());
         return root;
+    }
+
+    public Pane getTaskPage(){
+        // Main Page About
+        BorderPane root = new BorderPane();
+        root.setPrefSize(getLength(), getWidth());
+        // 设置主页面的菜单
+        Menu_create menu_create = new Menu_create(main);
+        root.setTop(menu_create.getTaskMenuBar());
+
+        // 设置主页面展示的任务
+//        task_showing task_showing = new task_showing(main, this);
+//        root.setCenter(task_showing.getGridPane());
+        return root;
+    }
+
+    public void from_Main_to_Task(){
+        // 从主页面切换到任务页面
+        this.scene.setRoot(TaskPage);
+    }
+
+    public void from_Task_to_Main(){
+        // 从任务页面切换到主页面
+        this.scene.setRoot(MainPage);
     }
 
     public ReadOnlyDoubleProperty widthProperty() {
