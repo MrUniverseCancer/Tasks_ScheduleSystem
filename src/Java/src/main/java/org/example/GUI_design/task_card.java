@@ -1,9 +1,9 @@
 package org.example.GUI_design;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
@@ -42,7 +42,7 @@ public class task_card {
 
     public Pane getCard1(){
         VBox card = new VBox();
-        card.setStyle("-fx-background-color: green;");
+        card.setStyle("-fx-background-color: lightgray;-fx-border-color: black");
         card.setSpacing(1); // Set the spacing between rows
         Button button = new Button("Exit");
         Label name = new Label(task_name);
@@ -73,6 +73,34 @@ public class task_card {
     public Button getCard2(){
         Button card = new Button(task_name);
         card.setStyle("-fx-background-color: lightyellow;");
+        return card;
+    }
+
+    public Pane getTaskCard(){
+        StackPane card = new StackPane();
+        Label name = new Label(task_name);
+        name.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-font-family: 'KaiTi';");;
+        card.getChildren().add(name);
+
+        // 创建一条底部的黑色直线
+        Line bottomLine = new Line();
+        bottomLine.setStartX(0);
+        bottomLine.endXProperty().bind(card.widthProperty());
+        bottomLine.setStroke(Color.BLACK);
+        bottomLine.setStrokeWidth(5);
+        bottomLine.startYProperty().bind(card.heightProperty().subtract(5));
+        bottomLine.endYProperty().bind(card.heightProperty().subtract(5));
+
+//        card.getChildren().add(bottomLine);
+        // 设置Pane的边框
+        card.setBorder(new Border(new BorderStroke(
+                Color.BLACK,           // 边框颜色
+                BorderStrokeStyle.SOLID, // 边框样式
+                null,                 // 边框圆角
+                new BorderWidths(3)   // 边框宽度
+        )));
+        // 使用Insets添加额外的空间以增加Pane的实际大小
+        card.setPadding(new Insets(20)); // 添加10像素的内边距以增加边缘空间
 
         return card;
     }

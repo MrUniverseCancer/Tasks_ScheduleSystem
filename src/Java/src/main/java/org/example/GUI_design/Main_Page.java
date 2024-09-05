@@ -2,6 +2,7 @@ package org.example.GUI_design;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
@@ -34,6 +35,14 @@ public class Main_Page {
         // 设置主页面展示的任务
         task_showing task_showing = new task_showing(main, this);
         root.setCenter(task_showing.getGridPane());
+
+        Button temp = new Button("Temp");
+        root.setBottom(temp);
+        temp.setOnAction(e -> {
+            Task_add task_add = new Task_add();
+            task_add.openWindows_Task_add();
+        });
+
         return root;
     }
 
@@ -48,6 +57,8 @@ public class Main_Page {
         // 设置主页面展示的任务
 //        task_showing task_showing = new task_showing(main, this);
 //        root.setCenter(task_showing.getGridPane());
+        Task_Page task_page = new Task_Page(main, this);
+        root.setCenter(task_page.getTaskPage());
         return root;
     }
 

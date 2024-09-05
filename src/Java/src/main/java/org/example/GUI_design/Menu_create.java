@@ -59,6 +59,10 @@ public class Menu_create {
         MenuItem edit_task   = new MenuItem("编辑任务");
         MenuItem finish_task = new MenuItem("完成任务");
         MenuItem unfinish_task = new MenuItem("未完成任务");
+        add_task.setOnAction(e -> {
+            Task_add task_add = new Task_add();
+            task_add.openWindows_Task_add();
+        });
 
 
 
