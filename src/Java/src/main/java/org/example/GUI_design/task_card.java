@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import org.example.server.add_change_del_task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,6 +23,7 @@ public class task_card {
     Double singalTaskTime;
     Double FactImportance;
     Double FactUrgency;
+    Button exit_button;
 
     private task_showing task_showing;
 
@@ -40,12 +42,24 @@ public class task_card {
         FactUrgency     = Double.parseDouble(list[10]);
     }
 
-    public Pane getCard1(){
+    public Pane getCard1(int index){
         VBox card = new VBox();
-        card.setStyle("-fx-background-color: lightgray;-fx-border-color: black");
+        card.setStyle("-fx-background-color: lightgray;-fx-border-color: black;");
         card.setSpacing(1); // Set the spacing between rows
-        Button button = new Button("Exit");
+
+        HBox hbox = new HBox();
+        exit_button = new Button("Exit");
+        Button button2 = new Button("Edit");
+        Button button3 = new Button("Delete");
+        hbox.getChildren().addAll(exit_button, button2, button3);
+        hbox.setSpacing(10);
+        button3.setOnAction(e -> {
+            add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
+        });
+
+
         Label name = new Label(task_name);
+        name.setStyle("-fx-font-size: 30px; -fx-font-weight: bold; -fx-font-family: 'KaiTi';");
         // Create a Line for separation
         Line separator1 = new Line();
         separator1.setStroke(Color.BLACK);
@@ -63,7 +77,21 @@ public class task_card {
         Button task_singalTaskTime  = new Button("singalTaskTime : "+singalTaskTime.toString());
         Button task_FactImportance  = new Button("FactImportance : "+FactImportance.toString());
         Button task_FactUrgency     = new Button("FactUrgency : "+FactUrgency.toString());
-        card.getChildren().addAll(button, name, separator1,task_LeftTime, task_ImportanceLevel,
+        if(index == 1){
+            // 在任务界面，希望字体更大
+            name.setStyle("-fx-font-size: 50px; -fx-font-weight: bold; -fx-font-family: 'KaiTi';");
+            task_LeftTime.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_ImportanceLevel.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_TaskConsuming.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_PunishLevel.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_PreferenceLevel.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_DifficultyLevel.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_BufferbtwTasks.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_singalTaskTime.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_FactImportance.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+            task_FactUrgency.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");
+        }
+        card.getChildren().addAll(hbox, name, separator1,task_LeftTime, task_ImportanceLevel,
                 task_TaskConsuming, task_PunishLevel, task_PreferenceLevel,
                 task_DifficultyLevel, task_BufferbtwTasks, task_singalTaskTime,
                 task_FactImportance, task_FactUrgency);
@@ -101,7 +129,10 @@ public class task_card {
         )));
         // 使用Insets添加额外的空间以增加Pane的实际大小
         card.setPadding(new Insets(20)); // 添加10像素的内边距以增加边缘空间
-
         return card;
+    }
+
+    public Button getExit_button() {
+        return exit_button;
     }
 }

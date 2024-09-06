@@ -7,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -43,9 +44,12 @@ public class Task_Page {
             Pane task_card_pane = task_card.getTaskCard();
             vBox.getChildren().add(task_card_pane);
             AtomicBoolean i = new AtomicBoolean(false);
-            Pane temp_card = task_card.getCard1();
-            temp_card.layoutXProperty().bind(Bindings.add(task_card_pane.layoutXProperty(),task_card_pane.widthProperty().multiply(1.2)));
+            Pane temp_card = task_card.getCard1(1);
+//            temp_card.layoutXProperty().bind(Bindings.add(task_card_pane.layoutXProperty(),task_card_pane.widthProperty().multiply(1.2)));
+            temp_card.layoutXProperty().bind(scrollPane.widthProperty().multiply(0.5));
             temp_card.layoutYProperty().bind(task_card_pane.layoutYProperty());
+            temp_card.prefWidthProperty().bind(scrollPane.widthProperty().multiply(0.4));
+            temp_card.prefHeightProperty().bind(scrollPane.heightProperty());
             task_card_pane.setOnMouseClicked(event -> {
                 // 第一次点击展示任务卡片
                 // 第二次点击取消任务卡片
@@ -61,19 +65,32 @@ public class Task_Page {
                     i.set(true);
                 }
             });
-            // Find the first Button and add event handler
-            for (var node : temp_card.getChildren()) {
-                if (node instanceof Button) {
-                    Button exit_Button = (Button) node;
-                    exit_Button.setOnAction(event -> {
-//                        System.out.println("First button clicked!");
-                        // 删除任务卡片
-                        middPane.getChildren().remove(temp_card);
-                        i.set(false);
-                    });
-                    break; // Only handle the first Button
-                }
-            }
+//            // Find the first Button and add event handler
+//            for (var node : temp_card.getChildren()) {
+//                if (node instanceof HBox) {
+//                    HBox hbox = (HBox) node;
+//                    for (var button : hbox.getChildren()) {
+//                        if (button instanceof Button) {
+//                            Button exit_Button = (Button) button;
+//                            exit_Button.setOnAction(event -> {
+//                                //                        System.out.println("First button clicked!");
+//                                // 删除任务卡片
+//                                middPane.getChildren().remove(temp_card);
+//                                i.set(false);
+//                            });
+//                            break; // Only handle the first Button
+//                        }
+//                        break; // Only handle the first HBox
+//                    }
+//                }
+//            }
+            Button exit_Button = task_card.getExit_button();
+            exit_Button.setOnAction(event -> {
+                //                        System.out.println("First button clicked!");
+                // 删除任务卡片
+                middPane.getChildren().remove(temp_card);
+                i.set(false);
+            });
             // 创建 Timeline 用于放大和旋转
             double ratio = 1.2;
             Timeline timelineEnter = new Timeline(

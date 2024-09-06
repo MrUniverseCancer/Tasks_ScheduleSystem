@@ -448,7 +448,7 @@ public class task_showing {
             temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15+optimize_x*dis));
             temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15+optimize_y*dis));
             AtomicBoolean i = new AtomicBoolean(false);
-            Pane temp_card = card.getCard1();
+            Pane temp_card = card.getCard1(0);
             temp_card.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).add((ratio_x > 0.5 ? -180 : 15)));
             temp_pane.setOnMouseClicked(event -> {
                 // 第一次点击展示任务卡片
@@ -467,15 +467,20 @@ public class task_showing {
             });
             // Find the first Button and add event handler
             for (var node : temp_card.getChildren()) {
-                if (node instanceof Button) {
-                    Button exit_Button = (Button) node;
-                    exit_Button.setOnAction(event -> {
-//                        System.out.println("First button clicked!");
-                        // 删除任务卡片
-                        pane.getChildren().remove(temp_card);
-                        i.set(false);
-                    });
-                    break; // Only handle the first Button
+                if (node instanceof HBox) {
+                    HBox hbox = (HBox) node;
+                    for (var button : hbox.getChildren()) {
+                        if (button instanceof Button) {
+                            Button exit_Button = (Button) button;
+                            exit_Button.setOnAction(event -> {
+                                // 删除任务卡片
+                                pane.getChildren().remove(temp_card);
+                                i.set(false);
+                            });
+                            break; // Only handle the first Button
+                        }
+                        break; // Only handle the first HBox
+                    }
                 }
             }
             pane.getChildren().add(temp_pane);
@@ -493,7 +498,7 @@ public class task_showing {
             Button fact_card = card.getCard2();
             vbox.getChildren().add(fact_card);
 
-            Pane temp_card = card.getCard1();
+            Pane temp_card = card.getCard1(0);
             temp_card.layoutXProperty().bind(pane.widthProperty().multiply(0.6));
             AtomicBoolean i = new AtomicBoolean(false);
             fact_card.setOnMouseClicked(event -> {
@@ -513,15 +518,20 @@ public class task_showing {
             });
             // Find the first Button and add event handler
             for (var node : temp_card.getChildren()) {
-                if (node instanceof Button) {
-                    Button exit_Button = (Button) node;
-                    exit_Button.setOnAction(event -> {
-//                        System.out.println("First button clicked!");
-                        // 删除任务卡片
-                        pane.getChildren().remove(temp_card);
-                        i.set(false);
-                    });
-                    break; // Only handle the first Button
+                if (node instanceof HBox) {
+                    HBox hbox = (HBox) node;
+                    for (var button : hbox.getChildren()) {
+                        if (button instanceof Button) {
+                            Button exit_Button = (Button) button;
+                            exit_Button.setOnAction(event -> {
+                                // 删除任务卡片
+                                pane.getChildren().remove(temp_card);
+                                i.set(false);
+                            });
+                            break; // Only handle the first Button
+                        }
+                        break; // Only handle the first HBox
+                    }
                 }
             }
         }

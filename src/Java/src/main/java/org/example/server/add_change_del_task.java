@@ -1,11 +1,14 @@
 package org.example.server;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class add_change_del_task {
 
@@ -35,4 +38,76 @@ public class add_change_del_task {
             e.printStackTrace();
         }
     }
+
+    public static int delete_task(String task_name, int fact_importance, int fact_urgency){
+        // 删除任务
+        // 读取文件
+        String filePath = "src/main/resources/task_plan/data.csv";
+        List<String[]> allData = new ArrayList<>();
+        // 创建文件对象
+        File file = new File(filePath);
+        boolean fileExists = file.exists(); // 检查文件是否存在
+        if (!fileExists) {
+            return 1;
+            // 文件不存在或损坏
+        }
+
+        try (CSVReader reader = new CSVReader(new FileReader(file))) {
+            allData = reader.readAll();
+            // 要匹配的固定位置
+            int[] indicesToMatch = {0, 9, 10}; // 例如我们要检查第0列和第2列
+            String[] valuesToMatch = {task_name, String.valueOf(fact_importance), String.valueOf(fact_urgency)}; // 要匹配的值
+
+            // 删除匹配的行
+            int result = removeMatchingRows(allData, indicesToMatch, valuesToMatch);
+            if(result == 0){
+                return 2;
+                // 删除失败
+            }
+        } catch (IOException | CsvException e) {
+            System.out.println("Error in reading CSV file");
+            e.printStackTrace();
+        }
+
+        try (FileWriter  writer = new FileWriter (filePath, false)) {
+            // 写入内容
+            for(String[] row : allData){
+                writer.write(String.join(",", row));
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static int removeMatchingRows(List<String[]> list, int[] indicesToMatch, String[] valuesToMatch) {
+        if (indicesToMatch.length != valuesToMatch.length) {
+            throw new IllegalArgumentException("Indices and values length must be the same.");
+        }
+
+        Iterator<String[]> iterator = list.iterator();
+
+        while (iterator.hasNext()) {
+            String[] current = iterator.next();
+
+            boolean matches = true;
+            for (int i = 0; i < indicesToMatch.length; i++) {
+                int index = indicesToMatch[i];
+                if (index >= current.length || !current[index].equals(valuesToMatch[i])) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                iterator.remove(); // 安全地删除匹配的行
+                return 1;
+                // 删除成功
+            }
+        }
+        return 0;
+        // 删除失败
+    }
+
 }
