@@ -1,13 +1,13 @@
 TaskName,LeftTime,ImportanceLevel,TaskConsuming,PunishLevel,PreferenceLevel,DifficultyLevel,BufferbtwTasks,singalTaskTime,FactImportance,FactUrgency
 NULL,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-Cook Dinner,5,45,1,30,40,20,0,1,100,100
 Cook Dinner,5,45,1,30,40,20,0,1,50,50
 Cook Dinner,5,45,1,30,40,20,0,1,20,20
 Cook Dinner,5,45,1,30,40,20,0,1,80,20
 Cook Dinner,5,45,1,30,40,20,0,1,80,20
 Cook Dinner,5,45,1,30,40,20,0,1,80,20
-计算机导论,0,0,0,0,0,0,0,0,70,85
-算法基础,0,0,0,0,0,0,0,0,90,80
-大研,0,0,0,0,0,0,0,0,60,75
-买水果,0,0,0,0,0,0,0,0,20,60
+Cook Dinner,5,45,1,30,40,20,0,1,80,20
+Cook Dinner,5,45,1,30,40,20,0,1,80,20
+Cook Dinner,5,45,1,30,40,20,0,1,80,20
 买沐浴露,0,0,0,0,0,0,0,0,20,40
+买水果,0,0,0,0,0,0,0,0,20,60
+张三打球,0,0,0,0,0,0,0,0,80,68

@@ -1,6 +1,7 @@
 package org.example.GUI_design;
 
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -53,8 +54,20 @@ public class task_card {
         Button button3 = new Button("Delete");
         hbox.getChildren().addAll(exit_button, button2, button3);
         hbox.setSpacing(10);
+        button2.setOnAction(e -> {
+            Task_add task_add = new Task_add();
+            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue());
+        });
         button3.setOnAction(e -> {
-            add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
+            int result = add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
+            String message = (result == 1) ? "数据文件不存在或损坏" : "删除失败";
+            if(result != 0) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Error Promotion");
+                alert.setHeaderText(null);
+                alert.setContentText(message);
+                alert.showAndWait();
+            }
         });
 
 

@@ -466,23 +466,13 @@ public class task_showing {
                 }
             });
             // Find the first Button and add event handler
-            for (var node : temp_card.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox hbox = (HBox) node;
-                    for (var button : hbox.getChildren()) {
-                        if (button instanceof Button) {
-                            Button exit_Button = (Button) button;
-                            exit_Button.setOnAction(event -> {
-                                // 删除任务卡片
-                                pane.getChildren().remove(temp_card);
-                                i.set(false);
-                            });
-                            break; // Only handle the first Button
-                        }
-                        break; // Only handle the first HBox
-                    }
-                }
-            }
+            Button exit_Button = card.getExit_button();
+            exit_Button.setOnAction(event -> {
+                // 删除任务卡片
+                pane.getChildren().remove(temp_card);
+                i.set(false);
+            });
+
             pane.getChildren().add(temp_pane);
         }
         return;
@@ -517,23 +507,12 @@ public class task_showing {
                 }
             });
             // Find the first Button and add event handler
-            for (var node : temp_card.getChildren()) {
-                if (node instanceof HBox) {
-                    HBox hbox = (HBox) node;
-                    for (var button : hbox.getChildren()) {
-                        if (button instanceof Button) {
-                            Button exit_Button = (Button) button;
-                            exit_Button.setOnAction(event -> {
-                                // 删除任务卡片
-                                pane.getChildren().remove(temp_card);
-                                i.set(false);
-                            });
-                            break; // Only handle the first Button
-                        }
-                        break; // Only handle the first HBox
-                    }
-                }
-            }
+            Button exit_Button = card.getExit_button();
+            exit_Button.setOnAction(event -> {
+                // 删除任务卡片
+                pane.getChildren().remove(temp_card);
+                i.set(false);
+            });
         }
 
         // 创建一个 ScrollPane，并将 vbox 添加到 ScrollPane 中

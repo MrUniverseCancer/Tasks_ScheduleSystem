@@ -20,8 +20,23 @@ public class Main_Page {
 
     public void createScene() {
         MainPage = getMainPage();
-        this.scene = new Scene(MainPage);
         TaskPage = getTaskPage();
+        this.scene = new Scene(MainPage);
+    }
+
+
+    // 在数据库有所更新后，重新加载任务页面，需要原始状态信息
+    public void createScene(int status){
+        MainPage = getMainPage();
+        TaskPage = getTaskPage();
+        switch (status){
+            case 0:
+                this.scene = new Scene(MainPage);
+                break;
+            case 1:
+                this.scene = new Scene(TaskPage);
+                break;
+        }
     }
 
     public Pane getMainPage(){

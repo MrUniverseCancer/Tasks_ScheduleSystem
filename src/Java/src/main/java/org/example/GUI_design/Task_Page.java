@@ -65,25 +65,6 @@ public class Task_Page {
                     i.set(true);
                 }
             });
-//            // Find the first Button and add event handler
-//            for (var node : temp_card.getChildren()) {
-//                if (node instanceof HBox) {
-//                    HBox hbox = (HBox) node;
-//                    for (var button : hbox.getChildren()) {
-//                        if (button instanceof Button) {
-//                            Button exit_Button = (Button) button;
-//                            exit_Button.setOnAction(event -> {
-//                                //                        System.out.println("First button clicked!");
-//                                // 删除任务卡片
-//                                middPane.getChildren().remove(temp_card);
-//                                i.set(false);
-//                            });
-//                            break; // Only handle the first Button
-//                        }
-//                        break; // Only handle the first HBox
-//                    }
-//                }
-//            }
             Button exit_Button = task_card.getExit_button();
             exit_Button.setOnAction(event -> {
                 //                        System.out.println("First button clicked!");

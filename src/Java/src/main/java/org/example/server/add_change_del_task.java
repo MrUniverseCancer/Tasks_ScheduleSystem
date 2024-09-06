@@ -81,6 +81,40 @@ public class add_change_del_task {
         return 0;
     }
 
+    public static int change_task(String task_name, int fact_importance, int fact_urgency, int new_fact_importance, int new_fact_urgency){
+        // 修改任务
+        // 读取文件
+        String filePath = "src/main/resources/task_plan/data.csv";
+        List<String[]> allData = new ArrayList<>();
+        // 创建文件对象
+        File file = new File(filePath);
+        boolean fileExists = file.exists(); // 检查文件是否存在
+        if (!fileExists) {
+            return 1;
+            // 文件不存在或损坏
+        }
+
+        try (CSVReader reader = new CSVReader(new FileReader(file))) {
+            allData = reader.readAll();
+            // 要匹配的固定位置
+            int[] indicesToMatch = {0}; // 例如我们要检查第0列
+            String[] valuesToMatch = {task_name}; // 要匹配的值
+
+            // 删除匹配的行
+            int result = removeMatchingRows(allData, indicesToMatch, valuesToMatch);
+            if (result == 0) {
+                return 2;
+                // 删除失败,无匹配项目
+            }
+        } catch (IOException | CsvException e) {
+            System.out.println("Error in reading CSV file");
+            e.printStackTrace();
+        }
+        add_task(task_name, new_fact_importance, new_fact_urgency);
+
+        return 0;
+    }
+
     public static int removeMatchingRows(List<String[]> list, int[] indicesToMatch, String[] valuesToMatch) {
         if (indicesToMatch.length != valuesToMatch.length) {
             throw new IllegalArgumentException("Indices and values length must be the same.");
