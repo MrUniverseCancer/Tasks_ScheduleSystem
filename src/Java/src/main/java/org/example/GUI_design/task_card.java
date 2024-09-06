@@ -1,5 +1,6 @@
 package org.example.GUI_design;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -43,7 +44,7 @@ public class task_card {
         FactUrgency     = Double.parseDouble(list[10]);
     }
 
-    public Pane getCard1(int index){
+    public Pane getCard1(int index, int status, Main_Page main_page){
         VBox card = new VBox();
         card.setStyle("-fx-background-color: lightgray;-fx-border-color: black;");
         card.setSpacing(1); // Set the spacing between rows
@@ -56,7 +57,7 @@ public class task_card {
         hbox.setSpacing(10);
         button2.setOnAction(e -> {
             Task_add task_add = new Task_add();
-            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue());
+            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), status, main_page);
         });
         button3.setOnAction(e -> {
             int result = add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
@@ -67,6 +68,9 @@ public class task_card {
                 alert.setHeaderText(null);
                 alert.setContentText(message);
                 alert.showAndWait();
+            }
+            else {
+                main_page.refresh_scene(status);
             }
         });
 

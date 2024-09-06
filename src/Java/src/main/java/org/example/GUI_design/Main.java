@@ -11,6 +11,8 @@ public class Main extends Application {
     private Length_And_Width length_and_width;
     private Main_Page main_page;
     private readTasks_FROM_csv readTasks_from_csv;
+    private Scene scene;
+    private Stage stage;
 
     public Main(){
         // 初始化界面长宽高
@@ -20,9 +22,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage)  {
-
+        this.stage = stage;
         this.main_page = new Main_Page(this);
-        Scene scene = main_page.getScene();
+        scene = main_page.getScene();
 
         // 设置总标题栏的文字和图像
         stage.setTitle("TaskScheduler");
@@ -44,5 +46,10 @@ public class Main extends Application {
 
     public readTasks_FROM_csv getReadTasksFromCsv(){
         return this.readTasks_from_csv;
+    }
+
+    public void refreshScene(Scene scene){
+        this.scene = scene;
+        stage.setScene(scene);
     }
 }

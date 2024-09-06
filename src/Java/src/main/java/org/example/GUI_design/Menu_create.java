@@ -1,5 +1,6 @@
 package org.example.GUI_design;
 
+import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -62,6 +63,7 @@ public class Menu_create {
         add_task.setOnAction(e -> {
             Task_add task_add = new Task_add();
             task_add.openWindows_Task_add();
+            main.getMainPage().refresh_scene(1);
         });
 
 

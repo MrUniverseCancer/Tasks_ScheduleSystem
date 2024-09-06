@@ -44,7 +44,7 @@ public class Task_Page {
             Pane task_card_pane = task_card.getTaskCard();
             vBox.getChildren().add(task_card_pane);
             AtomicBoolean i = new AtomicBoolean(false);
-            Pane temp_card = task_card.getCard1(1);
+            Pane temp_card = task_card.getCard1(1, 1, main_page);
 //            temp_card.layoutXProperty().bind(Bindings.add(task_card_pane.layoutXProperty(),task_card_pane.widthProperty().multiply(1.2)));
             temp_card.layoutXProperty().bind(scrollPane.widthProperty().multiply(0.5));
             temp_card.layoutYProperty().bind(task_card_pane.layoutYProperty());

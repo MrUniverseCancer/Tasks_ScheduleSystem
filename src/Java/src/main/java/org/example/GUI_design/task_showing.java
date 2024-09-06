@@ -354,7 +354,7 @@ public class task_showing {
                 case 3:
                     if (fact_importtance >= 50.0 && fact_urgency < 50.0) {
                         result.add(all.get(j));
-                        System.out.println("yes");
+                        // System.out.println("yes");
                     }
                     break;
                 case 4:
@@ -448,7 +448,7 @@ public class task_showing {
             temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15+optimize_x*dis));
             temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15+optimize_y*dis));
             AtomicBoolean i = new AtomicBoolean(false);
-            Pane temp_card = card.getCard1(0);
+            Pane temp_card = card.getCard1(0, 0, main_page);
             temp_card.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).add((ratio_x > 0.5 ? -180 : 15)));
             temp_pane.setOnMouseClicked(event -> {
                 // 第一次点击展示任务卡片
@@ -488,7 +488,7 @@ public class task_showing {
             Button fact_card = card.getCard2();
             vbox.getChildren().add(fact_card);
 
-            Pane temp_card = card.getCard1(0);
+            Pane temp_card = card.getCard1(0, 0, main_page);
             temp_card.layoutXProperty().bind(pane.widthProperty().multiply(0.6));
             AtomicBoolean i = new AtomicBoolean(false);
             fact_card.setOnMouseClicked(event -> {

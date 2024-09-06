@@ -33,7 +33,7 @@ public class add_change_del_task {
             writer.write(String.join(",", new_data));
             writer.newLine();
             
-            System.out.println("Data processed successfully!");
+            System.out.println("Data processed successfully!+-*/36");
         } catch (IOException e) {
             e.printStackTrace();
         }

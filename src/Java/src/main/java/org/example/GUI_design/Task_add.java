@@ -23,6 +23,7 @@ public class Task_add {
     private int Fact_importance;
     private int Fact_urgency;
     private boolean isFinish[] = new boolean[11];
+    private Stage stage;
 
 
     public Task_add(){
@@ -33,7 +34,7 @@ public class Task_add {
     // 用于标准增加任务时候的界面
     public void openWindows_Task_add(){
         // Open a new window to add a new task
-        Stage stage = new Stage();
+        stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL); // Set the window to be modal
 
         Scene scene = new Scene(new Pane(), 1500, 800);
@@ -81,9 +82,9 @@ public class Task_add {
     // 1. 原始参数会被传入
     // 2. 按钮的功能会有所不同：点击确认修改会优先删除原始任务，再添加新任务
     // 3. 会展示原始值
-    public void openWindows_Task_add(String task_name, int Fact_importance, int Fact_urgency) {
+    public void openWindows_Task_add(String task_name, int Fact_importance, int Fact_urgency, int status, Main_Page main_page) {
         // Open a new window to add a new task
-        Stage stage = new Stage();
+        stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL); // Set the window to be modal
 
         Scene scene = new Scene(new Pane(), 1500, 800);
@@ -121,7 +122,7 @@ public class Task_add {
         HBox Fact_urgency_hbox = getNum("紧急程度 : ", 10, Fact_urgency);
         vBox.getChildren().add(Fact_urgency_hbox);
 
-        Button button = getButton("确认修改", Fact_importance, Fact_urgency);
+        Button button = getButton("确认修改", Fact_importance, Fact_urgency, status, main_page);
         vBox.getChildren().add(button);
         stage.show();
     }
@@ -268,7 +269,8 @@ public class Task_add {
                 // 所有输入都是合法的
                 // 将数据存入数据库
                 add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency);
-                System.out.println("Get And finish");
+                stage.close();
+                System.out.println("增加成功，task_Add 273");
             }
             else {
                 // 有非法输入
@@ -285,7 +287,7 @@ public class Task_add {
 
 
     // 用于修改任务时的确认按钮
-    public Button getButton(String button_name, int old_importance, int old_urgency){
+    public Button getButton(String button_name, int old_importance, int old_urgency, int status, Main_Page main_page){
         Button button = new Button(button_name);
         button.setStyle("-fx-font-size: 40px; -fx-font-family: 'KaiTi';");
         button.setOnAction(e -> {
@@ -310,7 +312,8 @@ public class Task_add {
                 }
 
                 add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency);
-                System.out.println("Get And finish");
+                main_page.refresh_scene(status);
+                stage.close();
             }
             else {
                 // 有非法输入

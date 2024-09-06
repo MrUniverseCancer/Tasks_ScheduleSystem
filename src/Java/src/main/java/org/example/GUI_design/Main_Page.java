@@ -26,7 +26,7 @@ public class Main_Page {
 
 
     // 在数据库有所更新后，重新加载任务页面，需要原始状态信息
-    public void createScene(int status){
+    public void refresh_scene(int status){
         MainPage = getMainPage();
         TaskPage = getTaskPage();
         switch (status){
@@ -37,6 +37,7 @@ public class Main_Page {
                 this.scene = new Scene(TaskPage);
                 break;
         }
+        main.refreshScene(this.scene);
     }
 
     public Pane getMainPage(){
