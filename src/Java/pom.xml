@@ -79,5 +79,14 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>task_plan/data.csv</include>
+                    <include>images/*</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>

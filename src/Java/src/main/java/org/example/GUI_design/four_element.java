@@ -9,6 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
+import org.example.GUI_design.generalData.Conditional_Compilation;
 
 public class four_element {
     // 用于创建三种天体的图案
@@ -34,12 +35,11 @@ public class four_element {
 
     private Pane createSun(){
         Pane sunPane = new Pane();
-        Image sun = new Image("file:src/main/resources/images/太阳.jpg");
+        String image = (Conditional_Compilation.Is_Building) ? "images/太阳.jpg" : "file:src/main/resources/images/太阳.jpg";
+        Image sun = new Image(image);
         ImageView sunview = new ImageView(sun);
         sunview.setFitHeight(size);
         sunview.setFitWidth(size);
-//        sunview.setX(-size/2.0);
-//        sunview.setY(-size/2.0);
 
 
         Circle circle = new Circle(size/2.0 - 3); // Radius of the circle
@@ -55,12 +55,11 @@ public class four_element {
     }
     private Pane createMoon() {
         Pane moonPane = new Pane();
-        Image moon = new Image("file:src/main/resources/images/月亮2.jpg");
+        String image = (Conditional_Compilation.Is_Building) ? "images/月亮2.jpg" : "file:src/main/resources/images/月亮2.jpg";
+        Image moon = new Image(image);
         ImageView moonview = new ImageView(moon);
         moonview.setFitHeight(size);
         moonview.setFitWidth(size);
-//        moonview.setX(-size/2.0);
-//        moonview.setY(-size/2.0);
         Circle circle = new Circle(size/2.0 - 3); // Radius of the circle
         circle.setStroke(null);
         circle.setLayoutX(size/2.0);
@@ -75,12 +74,11 @@ public class four_element {
 
     private Pane createStar() {
         Pane starPane = new Pane();
-        Image star = new Image("file:src/main/resources/images/黑洞.jpg");
+        String image = (Conditional_Compilation.Is_Building) ? "images/黑洞.jpg" : "file:src/main/resources/images/黑洞.jpg";
+        Image star = new Image(image);
         ImageView starview = new ImageView(star);
         starview.setFitHeight(size);
         starview.setFitWidth(size);
-//        starview.setX(-size/2.0);
-//        starview.setY(-size/2.0);
         Circle circle = new Circle(size/2.0 - 3); // Radius of the circle
         circle.setStroke(null);
         circle.setLayoutX(size/2.0);

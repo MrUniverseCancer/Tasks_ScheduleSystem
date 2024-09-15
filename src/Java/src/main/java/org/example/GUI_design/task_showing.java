@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.util.Duration;
+import org.example.GUI_design.generalData.Conditional_Compilation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,9 @@ public class task_showing {
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
         // 添加图片
-        Image image = new Image("file:src/main/resources/images/箭头2.jpg");
+        String path = (Conditional_Compilation.Is_Building) ? "images/箭头2.jpg" : "file:src/main/resources/images/箭头2.jpg";
+
+        Image image = new Image(path);
         ImageView imageView = new ImageView(image);
         imageView.fitWidthProperty().bind(gridPane.widthProperty().divide(columnratio)); // 设置图片宽度
         imageView.fitHeightProperty().bind(gridPane.heightProperty().divide(rowratio)); // 设置图片高度

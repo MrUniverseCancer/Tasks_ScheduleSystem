@@ -1,5 +1,6 @@
 package org.example.GUI_design;
 
+import org.example.GUI_design.generalData.Conditional_Compilation;
 import org.example.GUI_design.generalData.Length_And_Width;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -27,8 +28,10 @@ public class Main extends Application {
         scene = main_page.getScene();
 
         // 设置总标题栏的文字和图像
+
+        String image = (Conditional_Compilation.Is_Building) ? "images/标题图片2.jpg" : "file:src/main/resources/images/标题图片2.jpg";
         stage.setTitle("TaskScheduler");
-        stage.getIcons().add(new Image("file:src/main/resources/images/标题图片2.jpg"));
+        stage.getIcons().add(new Image(image));
         stage.setScene(scene);
         stage.show();
     }

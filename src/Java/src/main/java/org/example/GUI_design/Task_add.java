@@ -32,7 +32,7 @@ public class Task_add {
 
 
     // 用于标准增加任务时候的界面
-    public void openWindows_Task_add(){
+    public void openWindows_Task_add(Main_Page mainpage, int status) {
         // Open a new window to add a new task
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL); // Set the window to be modal
@@ -72,7 +72,7 @@ public class Task_add {
         HBox Fact_urgency_hbox = getNum("紧急程度 : ", 10);
         vBox.getChildren().add(Fact_urgency_hbox);
 
-        Button button = getButton("确认");
+        Button button = getButton("确认", mainpage, status);
         vBox.getChildren().add(button);
         stage.show();
     }
@@ -256,7 +256,7 @@ public class Task_add {
 
 
     // 用于增加任务时的确认按钮
-    public Button getButton(String button_name){
+    public Button getButton(String button_name, Main_Page mainpage, int status){
         Button button = new Button(button_name);
         button.setStyle("-fx-font-size: 40px; -fx-font-family: 'KaiTi';");
         button.setOnAction(e -> {
@@ -270,6 +270,7 @@ public class Task_add {
                 // 将数据存入数据库
                 add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency);
                 stage.close();
+                mainpage.refresh_scene(status);
                 System.out.println("增加成功，task_Add 273");
             }
             else {

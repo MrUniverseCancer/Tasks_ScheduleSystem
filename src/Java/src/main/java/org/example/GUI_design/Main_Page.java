@@ -3,6 +3,9 @@ package org.example.GUI_design;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
@@ -12,9 +15,11 @@ public class Main_Page {
     private Main main;
     private Pane MainPage;
     private Pane TaskPage;
+    private SetUp_Page setUp_page;
 
     public Main_Page(Main main) {
         this.main = main;
+        this.setUp_page = new SetUp_Page();
         createScene();
     }
 
@@ -22,7 +27,12 @@ public class Main_Page {
         MainPage = getMainPage();
         TaskPage = getTaskPage();
         this.scene = new Scene(MainPage);
+        // 设置快捷键处理器
+        setupKeyBindings(scene);
     }
+
+
+
 
 
     // 在数据库有所更新后，重新加载任务页面，需要原始状态信息
@@ -37,8 +47,34 @@ public class Main_Page {
                 this.scene = new Scene(TaskPage);
                 break;
         }
+        // 设置快捷键处理器
+        setupKeyBindings(scene);
         main.refreshScene(this.scene);
     }
+
+
+
+
+    public void setupKeyBindings(Scene scene) {
+        // 创建快捷键组合
+        KeyCombination ctrlX = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
+        KeyCombination ctrlY = new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN);
+
+        // 为快捷键组合添加事件处理器
+        scene.getAccelerators().put(ctrlX, () -> {
+            System.out.println("Ctrl + X was pressed");
+            setUp_page.openWindows_Set_UP(this, 1);
+            // 在这里添加 Ctrl + X 快捷键触发时的逻辑
+        });
+
+        scene.getAccelerators().put(ctrlY, () -> {
+            System.out.println("Ctrl + Y was pressed");
+            // 在这里添加 Ctrl + Y 快捷键触发时的逻辑
+        });
+    }
+
+
+
 
     public Pane getMainPage(){
         // Task Page About
@@ -56,7 +92,7 @@ public class Main_Page {
         root.setBottom(temp);
         temp.setOnAction(e -> {
             Task_add task_add = new Task_add();
-            task_add.openWindows_Task_add();
+            task_add.openWindows_Task_add(this, 1);
         });
 
         return root;
