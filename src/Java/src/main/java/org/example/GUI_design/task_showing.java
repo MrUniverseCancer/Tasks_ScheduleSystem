@@ -383,8 +383,11 @@ public class task_showing {
         }
     }
 
-    public Pane getelement(int i){
-        Pane fig = four_element.create_fig(i);
+    public Pane getelement(int i, float x, float y){
+        Pane fig = four_element.create_fig(i, x, y);
+        // importtance & urgency 强调在create_fig函数中
+
+
         // 创建 Timeline 用于放大和旋转
         double ratio = 1.2;
         Timeline timelineEnter = new Timeline(
@@ -437,17 +440,18 @@ public class task_showing {
     public void add_element(Pane pane, List<String[]> tasks, int num_x, int num_y){
         for (String[] temp_task : tasks){
             task_card card = new task_card(temp_task);
+
             float x = Float.parseFloat(temp_task[9]);
-            
             float y = Float.parseFloat(temp_task[10]);
             double ratio_x = (50*num_x - x) / 50.0;
             double ratio_y = (50*num_y - y) / 50.0;
+
             // 边界支持
             int optimize_x = 0;
             int optimize_y = 0;
             optimize_x  = optimize(ratio_x);
             optimize_y = optimize(ratio_y);
-            Pane temp_pane = getelement(rand.nextInt(3) + 2);
+            Pane temp_pane = getelement(rand.nextInt(3) + 2, x, y);
             temp_pane.layoutXProperty().bind(pane.widthProperty().multiply(ratio_x).subtract(15+optimize_x*dis));
             temp_pane.layoutYProperty().bind(pane.heightProperty().multiply(ratio_y).subtract(15+optimize_y*dis));
             AtomicBoolean i = new AtomicBoolean(false);

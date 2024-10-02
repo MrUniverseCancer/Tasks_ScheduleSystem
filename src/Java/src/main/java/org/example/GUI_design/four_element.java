@@ -14,10 +14,20 @@ import org.example.GUI_design.generalData.Conditional_Compilation;
 public class four_element {
     // 用于创建三种天体的图案
     private double size = 30.0;
+    private int inportance_edge = 60;
 
-    public Pane create_fig(int i){
+    private int urgency_edge = 50;
+
+
+    public Pane create_fig(int i, float x, float y) {
+        i = (x > inportance_edge) ? 1 : i; // 用于判断是否是由于重要程度高于60，使得展现圆形红色提高对比度
+        // 计算大小，高于50，逐渐线性变大
+        size = 30.0;
+        double expand_ratio = (y > urgency_edge) ? (y - urgency_edge)/(100 - urgency_edge)*1: 0;
+        expand_ratio = expand_ratio + 1;
+        size = size * expand_ratio;
         return switch (i) {
-            case 1 -> createCircle();
+            case 1 -> createCircle(x);
             case 2 -> createSun();
             case 3 -> createMoon();
             case 4 -> createStar();
@@ -25,10 +35,16 @@ public class four_element {
         };
     }
 
-    private Pane createCircle() {
+    private Pane createCircle(float x) {
         Circle circle = new Circle();
-        circle.setFill(Color.YELLOW);
+        // 选取颜色程度
+        float color = (x - inportance_edge) / (100 - inportance_edge);
+        // 根据计算的比例生成颜色
+        Color fillColor = Color.RED.deriveColor(45*(1-color), 1, 1 - color, 1); // 调整颜色的属性
+        circle.setFill(fillColor);
         circle.setRadius(size/2);
+        circle.setLayoutX(size/2);
+        circle.setLayoutY(size/2);
         return new Pane(circle);
     }
 
