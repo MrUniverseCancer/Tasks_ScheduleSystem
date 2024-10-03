@@ -9,12 +9,14 @@ import javafx.scene.control.MenuItem;
 public class Menu_create {
     private MenuBar MainmenuBar = new MenuBar(); // 主页面返回的菜单栏
     private MenuBar TaskmenuBar = new MenuBar(); // 任务页面返回的菜单栏
+    private MenuBar PlanmenuBar = new MenuBar(); // 计划页面返回的菜单栏
     private Main main;
 
     public Menu_create(Main main){
         this.main = main;
         createMainMenu();
         createTaskMenu();
+        createPlanMenu();
     }
 
     public void createMainMenu(){
@@ -28,10 +30,14 @@ public class Menu_create {
             main.getMainPage().from_Main_to_Task();
         });
 
-        // 创建计划菜单和菜单项项
+        // 创建计划菜单和菜单项
         Menu menu_plan = new Menu("计划");
         MenuItem plan_page  = new MenuItem("计划页面");
         MenuItem make_plan     = new MenuItem("制定计划");
+
+        plan_page.setOnAction(e -> {
+            main.getMainPage().from_Main_to_Plan();
+        });
 
         // 创建设置菜单和菜单项
         Menu menu_set = getSetUpMenu(0);
@@ -58,6 +64,10 @@ public class Menu_create {
         Menu menu_plan = new Menu("计划");
         MenuItem plan_page  = new MenuItem("计划页面");
         MenuItem make_plan     = new MenuItem("制定计划");
+
+        plan_page.setOnAction(e -> {
+            main.getMainPage().from_Task_to_Plan();
+        });
 
         // 创建任务菜单
         Menu menu_task = new Menu("任务选项");
@@ -97,6 +107,41 @@ public class Menu_create {
         TaskmenuBar.getMenus().addAll(menu_main, menu_plan, menu_task, menu_set);
     }
 
+
+    public void createPlanMenu(){
+        // 创建任务菜单
+        // 创建任务菜单项
+        Menu menu_main = new Menu("主页面");
+        MenuItem main_return    = new MenuItem("回到主页面");
+        main_return.setOnAction(e -> {
+            main.getMainPage().from_Plan_to_Main(); // TODO:
+        });
+
+        // 创建任务菜单
+        // 创建任务菜单项
+        Menu menu_task = new Menu("任务");
+        MenuItem task_page    = new MenuItem("任务页面");
+        MenuItem history_task = new MenuItem("历史任务");
+
+        task_page.setOnAction(e -> {
+            main.getMainPage().from_Plan_to_Task();
+        });
+
+        // 创建计划菜单和菜单项项
+        Menu menu_plan = new Menu("计划");
+        MenuItem make_plan     = new MenuItem("制定计划");
+        MenuItem plan_page  = new MenuItem("计划页面");
+        MenuItem export_plan = new MenuItem("导出计划"); // 导出计划
+
+
+
+        menu_plan.getItems().addAll(plan_page, make_plan);
+        menu_task.getItems().addAll(task_page, history_task);
+        menu_main.getItems().addAll(main_return);
+        PlanmenuBar.getMenus().addAll(menu_main, menu_task, menu_plan);
+    }
+
+
     public Menu getSetUpMenu(int status) {
         // 创建设置菜单和菜单项
         Menu menu_set = new Menu("设置");
@@ -118,6 +163,9 @@ public class Menu_create {
 
     public MenuBar getTaskMenuBar(){
         return this.TaskmenuBar;
+    }
+    public MenuBar getPlanMenuBar(){
+        return this.PlanmenuBar;
     }
 }
 

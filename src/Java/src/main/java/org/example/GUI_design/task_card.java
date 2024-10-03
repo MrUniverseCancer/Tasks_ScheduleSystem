@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import org.example.server.ID_maintain;
 import org.example.server.add_change_del_task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,6 +26,7 @@ public class task_card {
     Double singalTaskTime;
     Double FactImportance;
     Double FactUrgency;
+    int    ID;
     Button exit_button;
 
     private task_showing task_showing;
@@ -42,6 +44,7 @@ public class task_card {
         singalTaskTime  = Double.parseDouble(list[8]);
         FactImportance  = Double.parseDouble(list[9]);
         FactUrgency     = Double.parseDouble(list[10]);
+        ID              = Integer.parseInt(list[11]);
     }
 
     public Pane getCard1(int index, int status, Main_Page main_page){
@@ -57,7 +60,7 @@ public class task_card {
         hbox.setSpacing(10);
         button2.setOnAction(e -> {
             Task_add task_add = new Task_add();
-            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), status, main_page);
+            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), ID, status, main_page);
         });
         button3.setOnAction(e -> {
             int result = add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());

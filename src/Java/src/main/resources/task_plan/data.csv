@@ -1,13 +1,7 @@
 TaskName,LeftTime,ImportanceLevel,TaskConsuming,PunishLevel,PreferenceLevel,DifficultyLevel,BufferbtwTasks,singalTaskTime,FactImportance,FactUrgency
-NULL,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-Cook Dinner,5,45,1,30,40,20,0,1,80,20
-Cook Dinner,5,45,1,30,40,20,0,1,80,20
-Cook Dinner,0,0,0,0,0,0,0,0,25,20
-cslook,0,0,0,0,0,0,0,0,79,35
-csapp,0,0,0,0,0,0,0,0,22,80
-买沐浴露,0,0,0,0,0,0,0,0,48,90
-helloWorld,0,0,0,0,0,0,0,0,100,100
-Cook Dinner,0,0,0,0,0,0,0,0,55,80
-fufu,0,0,0,0,0,0,0,0,0,0
-666,0,0,0,0,0,0,0,0,66,66
-买水果,0,0,0,0,0,0,0,0,78,88
+-1,0,0,0,0,0,0,0,0,35,65,1,Task Description
+fufu,0,0,0,0,0,0,0,0,3,2,1,Task Description
+666,0,0,0,0,0,0,0,0,66,66,2,Task Description
+helloWorld,0,0,0,0,0,0,0,0,96,100,1,Task Description
+readingBook,0,0,0,0,0,0,0,0,43,68,3,Task Description
+eating Fruit,0,0,0,0,0,0,0,0,65,35,4,Task Description

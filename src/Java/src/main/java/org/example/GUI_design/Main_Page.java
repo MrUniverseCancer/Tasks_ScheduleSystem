@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import org.example.GUI_design.planPage.plan_page;
 
 public class Main_Page {
 
@@ -15,6 +16,7 @@ public class Main_Page {
     private Main main;
     private Pane MainPage;
     private Pane TaskPage;
+    private Pane PlanPage;
     private SetUp_Page setUp_page;
 
     public Main_Page(Main main) {
@@ -26,6 +28,7 @@ public class Main_Page {
     public void createScene() {
         MainPage = getMainPage();
         TaskPage = getTaskPage();
+        PlanPage = getPlanPage();
         this.scene = new Scene(MainPage);
         // 设置快捷键处理器
         setupKeyBindings(scene);
@@ -80,7 +83,7 @@ public class Main_Page {
         // Task Page About
         BorderPane root = new BorderPane();
         root.setPrefSize(getLength(), getWidth());
-        // 设置任务页面的菜单
+        // 设置主页面的菜单
         Menu_create menu_create = new Menu_create(main);
         root.setTop(menu_create.getMainMenuBar());
 
@@ -102,15 +105,27 @@ public class Main_Page {
         // Main Page About
         BorderPane root = new BorderPane();
         root.setPrefSize(getLength(), getWidth());
-        // 设置主页面的菜单
+        // 设置任务页面的菜单
         Menu_create menu_create = new Menu_create(main);
         root.setTop(menu_create.getTaskMenuBar());
 
-        // 设置主页面展示的任务
-//        task_showing task_showing = new task_showing(main, this);
-//        root.setCenter(task_showing.getGridPane());
+        // 设置任务页面展示的任务
         Task_Page task_page = new Task_Page(main, this);
         root.setCenter(task_page.getTaskPage());
+        return root;
+    }
+
+    public Pane getPlanPage(){
+        // Plan Page About
+        BorderPane root = new BorderPane();
+        root.setPrefSize(getLength(), getWidth());
+        // 设置计划页面的菜单
+        Menu_create menu_create = new Menu_create(main);
+        root.setTop(menu_create.getPlanMenuBar());
+
+        // 设置计划页面展示的任务
+        plan_page plan_page = new plan_page(main, this);
+        root.setCenter(plan_page.getPlanPage());
         return root;
     }
 
@@ -122,6 +137,26 @@ public class Main_Page {
     public void from_Task_to_Main(){
         // 从任务页面切换到主页面
         this.scene.setRoot(MainPage);
+    }
+
+    public void from_Main_to_Plan(){
+        // 从主页面切换到计划页面
+        this.scene.setRoot(PlanPage);
+    }
+
+    public void from_Plan_to_Main(){
+        // 从计划页面切换到主页面
+        this.scene.setRoot(MainPage);
+    }
+
+    public void from_Task_to_Plan(){
+        // 从任务页面切换到计划页面
+        this.scene.setRoot(PlanPage);
+    }
+
+    public void from_Plan_to_Task(){
+        // 从计划页面切换到任务页面
+        this.scene.setRoot(TaskPage);
     }
 
     public ReadOnlyDoubleProperty widthProperty() {

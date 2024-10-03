@@ -13,9 +13,13 @@ import java.util.stream.Collectors;
 
 public class add_change_del_task {
 
-    public static void add_task(String task_name, int fact_importance, int fact_urgency){
+    public static void add_task(String task_name, int fact_importance, int fact_urgency, int ID){
         // 添加任务
-        String [] new_data = {task_name, "0", "0", "0", "0", "0", "0", "0", "0", String.valueOf(fact_importance), String.valueOf(fact_urgency)};
+        if(ID == -1) {
+            ID = ID_maintain.setID();
+        }
+        String [] new_data = {task_name, "0", "0", "0", "0", "0", "0", "0", "0",
+                String.valueOf(fact_importance), String.valueOf(fact_urgency),String.valueOf(ID), "Task Description"};
         // 输出文件路径
 
         if(Conditional_Compilation.Is_Building) {
@@ -30,7 +34,7 @@ public class add_change_del_task {
             // 文件写入
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
                 if(!fileExists){
-                    writer.write("TaskName,LeftTime,ImportanceLevel,TaskConsuming,PunishLevel,PreferenceLevel,DifficultyLevel,BufferbtwTasks,singalTaskTime,FactImportance,FactUrgency"); // 表头
+                    writer.write("TaskName,LeftTime,ImportanceLevel,TaskConsuming,PunishLevel,PreferenceLevel,DifficultyLevel,BufferbtwTasks,singalTaskTime,FactImportance,FactUrgency,ID,Description"); // 表头
                     writer.newLine();
                 }
                 // 写入数据和

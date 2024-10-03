@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 public class readTasks_FROM_csv {
 
-    private int length = 11; // 描述任务的属性的个数
+//    private int length = 11; // 描述任务的属性的个数
+    private int length = 13; // 描述任务的属性的个数,增加ID属性和任务描述属性
 
     public List<String[]>  readtasks() {
         // 使用类加载器获取资源文件的输入流
@@ -83,7 +84,7 @@ public class readTasks_FROM_csv {
                 }
                 // 过滤掉包含 -1 的项
                 List<String[]> filteredData = allData.stream()
-                        .filter(row -> Arrays.stream(row).noneMatch(cell -> "-1".equals(cell)))
+                        .filter(row -> Arrays.stream(row, 1, 11).noneMatch(cell -> "-1".equals(cell))) // 对第1列到第10列进行过滤
                         .collect(Collectors.toList());
                 return tasksSort(filteredData);    // 返回过滤后的数据
             } catch (IOException | CsvException e) {
