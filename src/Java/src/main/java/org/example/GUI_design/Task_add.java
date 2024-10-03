@@ -183,13 +183,13 @@ public class Task_add {
         // 添加监听器来响应 TextField 文本的变化
         textField.textProperty().addListener((obs, oldValue, newValue) -> {
             // 如果文本不是数字，则将文本设置为旧值
-            check(newValue, spinner.getValue(), label3, index);
+            check(newValue, spinner.getValue(), label3, index, 0);
         });
 
         // 监听 Spinner 值的变化
         spinner.valueProperty().addListener((obs, oldValue, newValue) -> {
             label2.setText("Selected number: " + newValue);
-            check(textField.getText(), newValue, label3, index);
+            check(textField.getText(), newValue, label3, index, 1);
         });
         // 创建 HBox 布局，并将 Label 和 TextField 添加进去
         HBox hbox = new HBox(50); // 10 是 Label 和 TextField 之间的间距
@@ -238,13 +238,13 @@ public class Task_add {
         // 添加监听器来响应 TextField 文本的变化
         textField.textProperty().addListener((obs, oldValue, newValue) -> {
             // 如果文本不是数字，则将文本设置为旧值
-            check(newValue, spinner.getValue(), label3, index, old_num);
+            check(newValue, spinner.getValue(), label3, index, old_num, 0);
         });
 
         // 监听 Spinner 值的变化
         spinner.valueProperty().addListener((obs, oldValue, newValue) -> {
             label2.setText("Selected number: " + newValue);
-            check(textField.getText(), newValue, label3, index, old_num);
+            check(textField.getText(), newValue, label3, index, old_num, 1);
         });
         // 创建 HBox 布局，并将 Label 和 TextField 添加进去
         HBox hbox = new HBox(50); // 10 是 Label 和 TextField 之间的间距
@@ -332,11 +332,12 @@ public class Task_add {
 
 
     // 用于增加任务时，检查输入是否合法，并且在label3中展示结果
-    public void check(String textfield_data, int spinner_data, Label label3, int i){
+    // 优先展示被修改的数据
+    public void check(String textfield_data, int spinner_data, Label label3, int i, int probe){
         int FSM = 0; // 模拟有限状态机
         int text_data = 0;
         int level_Data = 0;
-        if(textfield_data.isEmpty()){
+        if(textfield_data.isEmpty() || probe == 1){
             FSM = 1;
         }
         else {
@@ -405,11 +406,11 @@ public class Task_add {
 
 
     // 用于修改任务时，检查输入是否合法，并且在label3中展示结果
-    public void check(String textfield_data, int spinner_data, Label label3, int i, int old_num){
+    public void check(String textfield_data, int spinner_data, Label label3, int i, int old_num, int probe){
         int FSM = 0; // 模拟有限状态机
         int text_data = 0;
         int level_Data = 0;
-        if(textfield_data.isEmpty()){
+        if(textfield_data.isEmpty() || probe == 1){
             FSM = 1;
         }
         else {
