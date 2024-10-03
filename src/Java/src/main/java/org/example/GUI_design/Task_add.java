@@ -22,8 +22,12 @@ public class Task_add {
     private String task_name;
     private int Fact_importance;
     private int Fact_urgency;
-    private boolean isFinish[] = new boolean[11];
+    private String task_description;
+    private boolean isFinish[] = new boolean[13];
     private Stage stage;
+
+    // 替换的映射字符
+    private static final String COMMA_REPLACEMENT = "#COMMA#";
 
 
     public Task_add(){
@@ -59,18 +63,22 @@ public class Task_add {
         head_title.setAlignment(Pos.CENTER); // 设置文本居中对齐
         vBox.getChildren().add(head_title);
 
-        HBox name_hbox = getTag("任务名称 : ", null);
+        HBox name_hbox = getTag("任务名称 : ", null, 0);
         vBox.getChildren().add(name_hbox);
 
         for(int i = 1; i < 9; i++){
             isFinish[i] = true;
         }
+        isFinish[11] = true;
 
         HBox Fact_importance_hbox = getNum("重要程度 : ", 9);
         vBox.getChildren().add(Fact_importance_hbox);
 
         HBox Fact_urgency_hbox = getNum("紧急程度 : ", 10);
         vBox.getChildren().add(Fact_urgency_hbox);
+
+        HBox description_hbox = getTag("任务描述 : ", null, 12);
+        vBox.getChildren().add(description_hbox);
 
         Button button = getButton("确认", mainpage, status);
         vBox.getChildren().add(button);
@@ -82,7 +90,7 @@ public class Task_add {
     // 1. 原始参数会被传入
     // 2. 按钮的功能会有所不同：点击确认修改会优先删除原始任务，再添加新任务
     // 3. 会展示原始值
-    public void openWindows_Task_add(String task_name, int Fact_importance, int Fact_urgency, int ID, int status, Main_Page main_page) {
+    public void openWindows_Task_add(String task_name, int Fact_importance, int Fact_urgency, int ID, String task_description, int status, Main_Page main_page) {
         // Open a new window to add a new task
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL); // Set the window to be modal
@@ -109,18 +117,23 @@ public class Task_add {
         head_title.setAlignment(Pos.CENTER); // 设置文本居中对齐
         vBox.getChildren().add(head_title);
 
-        HBox name_hbox = getTag("任务名称 : ", task_name);
+        HBox name_hbox = getTag("任务名称 : ", restoreInput(task_name), 0);
         vBox.getChildren().add(name_hbox);
 
         for(int i = 1; i < 9; i++){
             isFinish[i] = true;
         }
+        isFinish[11] = true;
 
         HBox Fact_importance_hbox = getNum("重要程度 : ", 9, Fact_importance);
         vBox.getChildren().add(Fact_importance_hbox);
 
         HBox Fact_urgency_hbox = getNum("紧急程度 : ", 10, Fact_urgency);
         vBox.getChildren().add(Fact_urgency_hbox);
+
+        HBox description_hbox = getTag("任务描述 : ", restoreInput(task_description), 12);
+        System.out.println(restoreInput(task_description));
+        vBox.getChildren().add(description_hbox);
 
         Button button = getButton("确认修改", Fact_importance, Fact_urgency, ID, status, main_page);
         vBox.getChildren().add(button);
@@ -129,7 +142,8 @@ public class Task_add {
 
 
     // 根据old_name是否为null来判断是增加任务还是修改任务
-    public HBox getTag(String tag_name, String old_name){
+    // index用来分别是哪个输入框，名字还是描述
+    public HBox getTag(String tag_name, String old_name, int index){
         // 创建 Label 和 TextField
         Label label = new Label(tag_name);
         label.setStyle("-fx-font-size: 30px; -fx-font-family: 'KaiTi';");;
@@ -137,14 +151,25 @@ public class Task_add {
         textField.setPrefHeight(40); // 设置 TextField 的高度
 
         if(old_name != null){
-            task_name = old_name;
-            isFinish[0] = true;
+            if(index == 0){
+                task_name = processInput(old_name);
+            }
+            else if(index == 12){
+                task_description = processInput(old_name);
+            }
+            isFinish[index] = true;
         }
 
         textField.textProperty().addListener((obs, oldValue, newValue) -> {
             // 将最新文本放入结果中
-            task_name = newValue;
-            isFinish[0] = true;
+            String result = processInput(newValue);
+            if(index == 0){
+                task_name = result;
+            }
+            else if(index == 12){
+                task_description = result;
+            }
+            isFinish[index] = true;
         });
 
         // 创建 HBox 布局，并将 Label 和 TextField 添加进去
@@ -153,6 +178,22 @@ public class Task_add {
         hbox.setAlignment(Pos.CENTER_LEFT); // 将子节点对齐到左侧
         hbox.getChildren().addAll(label, textField);
         return hbox;
+    }
+
+    // 方法：处理用户输入，替换逗号
+    public static String processInput(String input) {
+        if (input != null) {
+            return input.replace(",", COMMA_REPLACEMENT);
+        }
+        return input;
+    }
+
+    // 方法：恢复原始输入，替换回逗号
+    public static String restoreInput(String input) {
+        if (input != null) {
+            return input.replace(COMMA_REPLACEMENT, ",");
+        }
+        return input;
     }
 
 
@@ -268,7 +309,7 @@ public class Task_add {
             if(isAllFinish){
                 // 所有输入都是合法的
                 // 将数据存入数据库
-                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency,-1); // 默认ID为-1，使得自行查询目前最大的ID
+                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency,-1, task_description); // 默认ID为-1，使得自行查询目前最大的ID
                 stage.close();
                 mainpage.refresh_scene(status);
                 System.out.println("增加成功，task_Add 273");
@@ -312,7 +353,7 @@ public class Task_add {
                     return;
                 }
 
-                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency, ID);
+                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency, ID, task_description);
                 main_page.refresh_scene(status);
                 stage.close();
             }

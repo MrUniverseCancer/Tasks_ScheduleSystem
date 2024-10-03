@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 
 public class add_change_del_task {
 
-    public static void add_task(String task_name, int fact_importance, int fact_urgency, int ID){
+    public static void add_task(String task_name, int fact_importance, int fact_urgency, int ID, String task_description){
         // 添加任务
         if(ID == -1) {
             ID = ID_maintain.setID();
         }
         String [] new_data = {task_name, "0", "0", "0", "0", "0", "0", "0", "0",
-                String.valueOf(fact_importance), String.valueOf(fact_urgency),String.valueOf(ID), "Task Description"};
+                String.valueOf(fact_importance), String.valueOf(fact_urgency),String.valueOf(ID), task_description};
         // 输出文件路径
 
         if(Conditional_Compilation.Is_Building) {

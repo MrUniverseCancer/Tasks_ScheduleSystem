@@ -27,6 +27,7 @@ public class task_card {
     Double FactImportance;
     Double FactUrgency;
     int    ID;
+    String task_description;
     Button exit_button;
 
     private task_showing task_showing;
@@ -34,17 +35,18 @@ public class task_card {
     public task_card(String[] list){
         this.head = list;
         task_name = list[0];
-        LeftTime        = Double.parseDouble(list[1]);
-        ImportanceLevel = Double.parseDouble(list[2]);
-        TaskConsuming   = Double.parseDouble(list[3]);
-        PunishLevel     = Double.parseDouble(list[4]);
-        PreferenceLevel = Double.parseDouble(list[5]);
-        DifficultyLevel = Double.parseDouble(list[6]);
-        BufferbtwTasks  = Double.parseDouble(list[7]);
-        singalTaskTime  = Double.parseDouble(list[8]);
-        FactImportance  = Double.parseDouble(list[9]);
-        FactUrgency     = Double.parseDouble(list[10]);
-        ID              = Integer.parseInt(list[11]);
+        LeftTime         = Double.parseDouble(list[1]);
+        ImportanceLevel  = Double.parseDouble(list[2]);
+        TaskConsuming    = Double.parseDouble(list[3]);
+        PunishLevel      = Double.parseDouble(list[4]);
+        PreferenceLevel  = Double.parseDouble(list[5]);
+        DifficultyLevel  = Double.parseDouble(list[6]);
+        BufferbtwTasks   = Double.parseDouble(list[7]);
+        singalTaskTime   = Double.parseDouble(list[8]);
+        FactImportance   = Double.parseDouble(list[9]);
+        FactUrgency      = Double.parseDouble(list[10]);
+        ID               = Integer.parseInt(list[11]);
+        task_description = list[12];
     }
 
     public Pane getCard1(int index, int status, Main_Page main_page){
@@ -60,7 +62,7 @@ public class task_card {
         hbox.setSpacing(10);
         button2.setOnAction(e -> {
             Task_add task_add = new Task_add();
-            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), ID, status, main_page);
+            task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), ID, task_description, status, main_page);
         });
         button3.setOnAction(e -> {
             int result = add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
