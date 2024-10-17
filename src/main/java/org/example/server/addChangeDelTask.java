@@ -6,17 +6,15 @@ import org.example.GUI_design.generalData.Conditional_Compilation;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class add_change_del_task {
+public class addChangeDelTask {
 
     public static void add_task(String task_name, int fact_importance, int fact_urgency, int ID, String task_description){
         // 添加任务
         if(ID == -1) {
-            ID = ID_maintain.setID();
+            ID = IDMaintain.setID();
         }
         String [] new_data = {task_name, "0", "0", "0", "0", "0", "0", "0", "0",
                 String.valueOf(fact_importance), String.valueOf(fact_urgency),String.valueOf(ID), task_description};

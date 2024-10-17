@@ -2,7 +2,7 @@ package org.example.server;
 
 import java.io.*;
 
-public class ID_maintain {
+public class IDMaintain {
     // 维护一个全局的ID
 
 

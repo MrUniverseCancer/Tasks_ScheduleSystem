@@ -1,6 +1,5 @@
 package org.example.GUI_design;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -8,10 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import org.example.server.ID_maintain;
-import org.example.server.add_change_del_task;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.example.server.addChangeDelTask;
 
 public class task_card {
     String [] head;
@@ -65,7 +61,7 @@ public class task_card {
             task_add.openWindows_Task_add(task_name, FactImportance.intValue(), FactUrgency.intValue(), ID, task_description, status, main_page);
         });
         button3.setOnAction(e -> {
-            int result = add_change_del_task.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
+            int result = addChangeDelTask.delete_task(task_name, FactImportance.intValue(), FactUrgency.intValue());
             String message = (result == 1) ? "数据文件不存在或损坏" : "删除失败";
             if(result != 0) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);

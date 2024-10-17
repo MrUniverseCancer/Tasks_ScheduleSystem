@@ -2,16 +2,13 @@ package org.example.GUI_design;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import org.example.server.readTasks_FROM_csv;
+import org.example.server.readTasksFromCsv;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +34,7 @@ public class Task_Page {
         Pane middPane = new Pane();
         VBox vBox = new VBox();
 
-        readTasks_FROM_csv readTasks_from_csv = main.getReadTasksFromCsv();
+        readTasksFromCsv readTasks_from_csv = main.getReadTasksFromCsv();
         tasks = readTasks_from_csv.readtasks();
         for(String[] task: tasks){
             task_card task_card = new task_card(task);

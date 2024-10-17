@@ -1,21 +1,16 @@
 package org.example.GUI_design;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import static java.util.Collections.replaceAll;
-
-import org.example.server.add_change_del_task;
+import org.example.server.addChangeDelTask;
 
 
 public class Task_add {
@@ -309,7 +304,7 @@ public class Task_add {
             if(isAllFinish){
                 // 所有输入都是合法的
                 // 将数据存入数据库
-                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency,-1, task_description); // 默认ID为-1，使得自行查询目前最大的ID
+                addChangeDelTask.add_task(task_name, Fact_importance, Fact_urgency,-1, task_description); // 默认ID为-1，使得自行查询目前最大的ID
                 stage.close();
                 mainpage.refresh_scene(status);
                 System.out.println("增加成功，task_Add 273");
@@ -342,7 +337,7 @@ public class Task_add {
                 // 所有输入都是合法的
                 // 将数据存入数据库
                 // 先删除
-                int result = add_change_del_task.delete_task(task_name, old_importance, old_urgency);
+                int result = addChangeDelTask.delete_task(task_name, old_importance, old_urgency);
                 if(result != 0){
                     // 删除失败
                     Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -353,7 +348,7 @@ public class Task_add {
                     return;
                 }
 
-                add_change_del_task.add_task(task_name, Fact_importance, Fact_urgency, ID, task_description);
+                addChangeDelTask.add_task(task_name, Fact_importance, Fact_urgency, ID, task_description);
                 main_page.refresh_scene(status);
                 stage.close();
             }

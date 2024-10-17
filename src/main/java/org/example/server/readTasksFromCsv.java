@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class readTasks_FROM_csv {
+public class readTasksFromCsv {
 
 //    private int length = 11; // 描述任务的属性的个数
     private int length = 13; // 描述任务的属性的个数,增加ID属性和任务描述属性
@@ -108,7 +108,7 @@ public class readTasks_FROM_csv {
     }
 
     public static void main(String[] args) {
-        readTasks_FROM_csv readTasks_FROM_csv = new readTasks_FROM_csv();
+        readTasksFromCsv readTasks_FROM_csv = new readTasksFromCsv();
         readTasks_FROM_csv.readtasks();
     }
 }
