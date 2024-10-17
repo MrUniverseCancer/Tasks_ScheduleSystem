@@ -13,6 +13,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import org.example.GUI_design.generalData.Conditional_Compilation;
+import org.example.server.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +28,7 @@ public class task_showing {
     private four_element four_element;
     private double columnratio = 9.0;
     private double rowratio = 9.0;
-    private List<String []> tasks1;
-    private List<String []> tasks2;
-    private List<String []> tasks3;
-    private List<String []> tasks4;
+
     private Random rand = new Random();
     private double dis = 8;
     private Pane pane22_1;
@@ -42,14 +40,19 @@ public class task_showing {
     private Pane pane32_2;
     private Pane pane33_2;
 
-    public task_showing(Main main, Main_Page main_page){
+    private List<Task> tasks1;
+    private List<Task> tasks2;
+    private List<Task> tasks3;
+    private List<Task> tasks4;
+
+    public task_showing(Main main, Main_Page main_page) {
         this.main = main;
         this.main_page = main_page;
         this.four_element = new four_element();
-        tasks1 = new ArrayList<String[]>();
-        tasks2 = new ArrayList<String[]>();
-        tasks3 = new ArrayList<String[]>();
-        tasks4 = new ArrayList<String[]>();
+        tasks1 = new ArrayList<>();
+        tasks2 = new ArrayList<>();
+        tasks3 = new ArrayList<>();
+        tasks4 = new ArrayList<>();
         createGridPane();
     }
 
@@ -254,7 +257,7 @@ public class task_showing {
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
         getTasks(2);
-        List<String[]> tasks = tasks2;
+        List<Task> tasks = tasks2;
         switch (i){
             case 0:
                 add_element(pane, tasks, 2, 2);
@@ -272,7 +275,7 @@ public class task_showing {
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
         getTasks(1);
-        List<String[]> tasks = tasks1;
+        List<Task> tasks = tasks1;
         switch (i){
             case 0:
                 add_element(pane, tasks, 1,2);
@@ -291,7 +294,7 @@ public class task_showing {
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
         getTasks(3);
-        List<String[]> tasks = tasks3;
+        List<Task> tasks = tasks3;
         switch (i){
             case 0:
                 add_element(pane, tasks, 2,1);
@@ -310,7 +313,7 @@ public class task_showing {
         pane.setStyle("-fx-background-color: lightgray; -fx-border-color: black;"); // Styling for visibility
 
         getTasks(4);
-        List<String[]> tasks = tasks4;
+        List<Task> tasks = tasks4;
         switch (i){
             case 0:
                 add_element(pane, tasks, 1,1);
@@ -322,52 +325,65 @@ public class task_showing {
         return pane;
     }
 
-    public List<String []> getTasks(){
-        return this.main.getReadTasksFromCsv().readtasks();
+    public List<String[]> getTasks() {
+        List<String[]> result = new ArrayList<>();
+        List<Task> tasks = this.main.getReadTasksFromCsv().readtasks();
+
+        for (Task task : tasks) {
+            String[] taskArray = new String[13]; // 保持13个元素以匹配原来的CSV格式
+            taskArray[0] = String.valueOf(task.getUid());
+            taskArray[1] = task.getName();
+            taskArray[2] = task.getDescription();
+            taskArray[3] = ""; // 开始时间，当前Task类不支持，用空字符串占位
+            taskArray[4] = ""; // 结束时间，当前Task类不支持，用空字符串占位
+            taskArray[5] = task.getDdl() != null ? task.getDdl().toString() : "";
+            taskArray[6] = task.getTaskTime() != null ? task.getTaskTime().toString() : "";
+            taskArray[7] = ""; // 状态，当前Task类不支持，用空字符串占位
+            taskArray[8] = ""; // 类型，当前Task类不支持，用空字符串占位
+            taskArray[9] = String.valueOf(task.getImportance());
+            taskArray[10] = String.valueOf(task.getUrgency());
+            taskArray[11] = ""; // 创建时间，当前Task类不支持，用空字符串占位
+            taskArray[12] = ""; // 更新时间，当前Task类不支持，用空字符串占位
+
+            result.add(taskArray);
+        }
+
+        return result;
     }
 
-    public void getTasks(int i){
-        // 笛卡尔象限2134代表参数i的2134的排列d
-        List<String []> all = getTasks();
-        List<String []> result = new ArrayList<String []>();
 
-        int length = all.size();
-        for(int j = 0; j < length; j++){
-            float fact_importtance = 0.0f;
-            float fact_urgency     = 0.0f;
-            try {
-                // 将字符串转换为 float
-                fact_importtance = Float.parseFloat(all.get(j)[9]);
-                fact_urgency     = Float.parseFloat(all.get(j)[10]);
-            } catch (NumberFormatException e) {
-                // 捕捉转换失败的异常
-                System.out.println("无法将字符串转换为浮点数: " + e.getMessage());
-            }
+
+    public void getTasks(int i) {
+        List<Task> all = this.main.getReadTasksFromCsv().readtasks();
+        List<Task> result = new ArrayList<>();
+
+        for (Task task : all) {
+            int importance = task.getImportance();
+            int urgency = task.getUrgency();
             switch (i) {
                 case 1:
-                    if (fact_importtance < 50.0 && fact_urgency >= 50.0) {
-                        result.add(all.get(j));
+                    if (importance < 50 && urgency >= 50) {
+                        result.add(task);
                     }
                     break;
                 case 2:
-                    if (fact_importtance >= 50.0 && fact_urgency >= 50.0) {
-                        result.add(all.get(j));
+                    if (importance >= 50 && urgency >= 50) {
+                        result.add(task);
                     }
                     break;
                 case 3:
-                    if (fact_importtance >= 50.0 && fact_urgency < 50.0) {
-                        result.add(all.get(j));
-                        // System.out.println("yes");
+                    if (importance >= 50 && urgency < 50) {
+                        result.add(task);
                     }
                     break;
                 case 4:
-                    if (fact_importtance < 50.0 && fact_urgency < 50.0) {
-                        result.add(all.get(j));
+                    if (importance < 50 && urgency < 50) {
+                        result.add(task);
                     }
                     break;
             }
         }
-        switch (i){
+        switch (i) {
             case 1:
                 tasks1 = result;
                 break;
@@ -437,14 +453,14 @@ public class task_showing {
         return 0;
     }
 
-    public void add_element(Pane pane, List<String[]> tasks, int num_x, int num_y){
-        for (String[] temp_task : tasks){
+    public void add_element(Pane pane, List<Task> tasks, int num_x, int num_y) {
+        for (Task temp_task : tasks) {
             task_card card = new task_card(temp_task);
 
-            float x = Float.parseFloat(temp_task[9]);
-            float y = Float.parseFloat(temp_task[10]);
-            double ratio_x = (50*num_x - x) / 50.0;
-            double ratio_y = (50*num_y - y) / 50.0;
+            int x = temp_task.getImportance();
+            int y = temp_task.getUrgency();
+            double ratio_x = (50 * num_x - x) / 50.0;
+            double ratio_y = (50 * num_y - y) / 50.0;
 
             // 边界支持
             int optimize_x = 0;
@@ -485,12 +501,10 @@ public class task_showing {
         return;
     }
 
-    public void add_card(Pane pane, List<String[]> tasks) {
-        // 创建一个 VBox 用于垂直排列按钮
-        VBox vbox = new VBox(10); // 10 是按钮之间的间距
+    public void add_card(Pane pane, List<Task> tasks) {
+        VBox vbox = new VBox(10);
 
-        // 创建并添加多个按钮到 VBox
-        for(String[] temp_task : tasks){
+        for (Task temp_task : tasks) {
             task_card card = new task_card(temp_task);
             Button fact_card = card.getCard2();
             vbox.getChildren().add(fact_card);
