@@ -8,6 +8,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import org.example.server.Task;
 import org.example.server.readTasksFromCsv;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class Task_Page {
     private Main main;
     private Main_Page main_page;
     private Pane TaskPage;
-    private List<String[]> tasks = new ArrayList<String[]>();
+    private List<Task> tasks = new ArrayList<>();
 
 
     public Task_Page(Main main, Main_Page main_page) {
@@ -36,7 +37,7 @@ public class Task_Page {
 
         readTasksFromCsv readTasks_from_csv = main.getReadTasksFromCsv();
         tasks = readTasks_from_csv.readtasks();
-        for(String[] task: tasks){
+        for(Task task: tasks){
             task_card task_card = new task_card(task);
             Pane task_card_pane = task_card.getTaskCard();
             vBox.getChildren().add(task_card_pane);

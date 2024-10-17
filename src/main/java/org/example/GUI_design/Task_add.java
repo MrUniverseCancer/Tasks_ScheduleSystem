@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.example.server.addChangeDelTask;
+import org.example.server.TaskAdapter;
 
 
 public class Task_add {
@@ -304,7 +304,7 @@ public class Task_add {
             if(isAllFinish){
                 // 所有输入都是合法的
                 // 将数据存入数据库
-                addChangeDelTask.add_task(task_name, Fact_importance, Fact_urgency,-1, task_description); // 默认ID为-1，使得自行查询目前最大的ID
+                TaskAdapter.addTask(task_name, Fact_importance, Fact_urgency, task_description, 0, null); // 默认ID为-1，使得自行查询目前最大的ID
                 stage.close();
                 mainpage.refresh_scene(status);
                 System.out.println("增加成功，task_Add 273");
@@ -337,7 +337,7 @@ public class Task_add {
                 // 所有输入都是合法的
                 // 将数据存入数据库
                 // 先删除
-                int result = addChangeDelTask.delete_task(task_name, old_importance, old_urgency);
+                int result = TaskAdapter.deleteTask(task_name, old_importance, old_urgency);
                 if(result != 0){
                     // 删除失败
                     Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -348,7 +348,7 @@ public class Task_add {
                     return;
                 }
 
-                addChangeDelTask.add_task(task_name, Fact_importance, Fact_urgency, ID, task_description);
+                TaskAdapter.addTask(task_name, Fact_importance, Fact_urgency, task_description, 0, null);
                 main_page.refresh_scene(status);
                 stage.close();
             }

@@ -1,114 +1,62 @@
 package org.example.server;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-import org.example.GUI_design.generalData.Conditional_Compilation;
-
-import java.io.*;
-import java.util.Arrays;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class readTasksFromCsv {
 
-//    private int length = 11; // 描述任务的属性的个数
-    private int length = 13; // 描述任务的属性的个数,增加ID属性和任务描述属性
+    public List<Task> readtasks() {
+        String sql = "SELECT * FROM tasks ORDER BY (importance + urgency) DESC";
+        List<Task> tasks = new ArrayList<>();
 
-    public List<String[]>  readtasks() {
-        // 使用类加载器获取资源文件的输入流
-        if(Conditional_Compilation.Is_Building) {
-//            System.out.println("Building");
-            String filePath = "task_plan/data.csv";
-            boolean fileExists = true; // 检查文件是否存在
-            // 创建目录（如果不存在的话）
-            File directory = new File(filePath).getParentFile();
-            if (!directory.exists()) {
-                directory.mkdirs();
-                fileExists = false;
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Task task = new Task();
+                task.setUid(rs.getInt("uid"));
+                task.setName(rs.getString("name"));
+                task.setDescription(rs.getString("description"));
+                task.setImportance(rs.getInt("importance"));
+                task.setUrgency(rs.getInt("urgency"));
+                task.setTaskTime(rs.getObject("task_time") != null ? rs.getInt("task_time") : null);
+                String ddlStr = rs.getString("ddl");
+                task.setDdl(ddlStr != null ? LocalDateTime.parse(ddlStr) : null);
+                tasks.add(task);
             }
-            if( !fileExists ) {
-                // 第一次从资源文件中读取缓存数据
-                // 写入外部文件
-                try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("task_plan/data.csv");
-                     CSVReader reader = new CSVReader(new InputStreamReader(inputStream));
-                     BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-                    if (inputStream == null) {
-                        throw new IOException("Resource not found: task_plan/data.csv");
-                    }
-
-                    List<String[]> allData = reader.readAll();
-
-                    // 过滤掉包含 -1 的项
-                    List<String[]> filteredData = allData.stream()
-                            .filter(row -> Arrays.stream(row).noneMatch(cell -> "-1".equals(cell)))
-                            .collect(Collectors.toList());
-
-                    for(String[] row : filteredData) {
-                        writer.write(String.join(",", row));
-                        writer.newLine();
-                    }
-
-                } catch (IOException | CsvException e) {
-                    System.out.println("Error in reading CSV file");
-                    e.printStackTrace();
-                }
-            }
-            try (CSVReader reader = new CSVReader(new FileReader(filePath));) {
-
-                List<String[]> allData = reader.readAll();
-                // 去除第一行
-                if (!allData.isEmpty()) {
-                    allData.remove(0); // 修正： 使用 remove(0) 去除第一行
-                }
-                // 过滤掉包含 -1 的项
-                List<String[]> filteredData = allData.stream()
-                        .filter(row -> Arrays.stream(row).noneMatch(cell -> "-1".equals(cell)))
-                        .collect(Collectors.toList());
-
-                return tasksSort(filteredData); // 返回过滤后的数据
-
-            } catch (IOException | CsvException e) {
-                System.out.println("Error in reading CSV file");
-                e.printStackTrace();
-            }
-            return null; // 返回 null 或者合适的默认值}
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        else {
-//            System.out.println("Not Building");
-            String csvFile = "src/main/resources/task_plan/data.csv";
-            try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
-                List<String[]> allData = reader.readAll();
-                // 去除第一行
-                if (!allData.isEmpty()) {
-                    allData.removeFirst();
-                }
-                // 过滤掉包含 -1 的项
-                List<String[]> filteredData = allData.stream()
-                        .filter(row -> Arrays.stream(row, 1, 11).noneMatch(cell -> "-1".equals(cell))) // 对第1列到第10列进行过滤
-                        .collect(Collectors.toList());
-                return tasksSort(filteredData);    // 返回过滤后的数据
-            } catch (IOException | CsvException e) {
-                System.out.println("Error in reading CSV file");
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
 
-    public List<String[]> tasksSort(List<String[]> tasks){
-        // 对任务进行排序
-        tasks.sort((o1, o2) -> {
-            double importance1 = Double.parseDouble(o2[9]);
-            double urgency1 = Double.parseDouble(o2[10]);
-            double importance2 = Double.parseDouble(o1[9]);
-            double urgency2 = Double.parseDouble(o1[10]);
-            return Double.compare(importance1 + urgency1, importance2 + urgency2);
-        });
         return tasks;
     }
 
-    public static void main(String[] args) {
-        readTasksFromCsv readTasks_FROM_csv = new readTasksFromCsv();
-        readTasks_FROM_csv.readtasks();
+    public List<String[]> getTasks() {
+        List<String[]> result = new ArrayList<>();
+        List<Task> tasks = this.readtasks();
+
+        for (Task task : tasks) {
+            String[] taskArray = new String[13]; // 保持13个元素以匹配原来的CSV格式
+            taskArray[0] = String.valueOf(task.getUid());
+            taskArray[1] = task.getName();
+            taskArray[2] = task.getDescription();
+            taskArray[3] = ""; // 开始时间，当前Task类不支持，用空字符串占位
+            taskArray[4] = ""; // 结束时间，当前Task类不支持，用空字符串占位
+            taskArray[5] = task.getDdl() != null ? task.getDdl().toString() : "";
+            taskArray[6] = task.getTaskTime() != null ? task.getTaskTime().toString() : "";
+            taskArray[7] = ""; // 状态，当前Task类不支持，用空字符串占位
+            taskArray[8] = ""; // 类型，当前Task类不支持，用空字符串占位
+            taskArray[9] = String.valueOf(task.getImportance());
+            taskArray[10] = String.valueOf(task.getUrgency());
+            taskArray[11] = ""; // 创建时间，当前Task类不支持，用空字符串占位
+            taskArray[12] = ""; // 更新时间，当前Task类不支持，用空字符串占位
+
+            result.add(taskArray);
+        }
+
+        return result;
     }
 }
