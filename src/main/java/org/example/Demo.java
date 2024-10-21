@@ -19,13 +19,13 @@ public class Demo {
         System.out.println(cefApp.getVersion());
 
         final CefClient cefClient = cefApp.createClient();
-        final CefBrowser browser = cefClient.createBrowser("https://www.baidu.com", CefRendering.DEFAULT, true);
+        final CefBrowser browser = cefClient.createBrowser("http://localhost:3000/", CefRendering.DEFAULT, true);
 
         final JFrame frame = new JFrame();
         frame.setTitle("Test");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(browser.getUIComponent());
-        frame.setSize(500, 500);
+        frame.setSize(1600, 1000);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
