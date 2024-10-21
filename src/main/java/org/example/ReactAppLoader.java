@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 
 public class ReactAppLoader extends JFrame {
     private static final int PORT = 8009;
-    private static final String BASE_DIR = "out";
+    private static final String BASE_DIR = "frontend/out";
 
     public ReactAppLoader(String reactAppPath) {
         final JCefAppConfig jCefAppConfig = JCefAppConfig.getInstance();
