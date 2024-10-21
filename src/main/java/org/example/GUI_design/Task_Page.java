@@ -2,16 +2,14 @@ package org.example.GUI_design;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import org.example.server.readTasks_FROM_csv;
+import org.example.server.Task;
+import org.example.server.readTasksFromCsv;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,7 @@ public class Task_Page {
     private Main main;
     private Main_Page main_page;
     private Pane TaskPage;
-    private List<String[]> tasks = new ArrayList<String[]>();
+    private List<Task> tasks = new ArrayList<>();
 
 
     public Task_Page(Main main, Main_Page main_page) {
@@ -37,9 +35,9 @@ public class Task_Page {
         Pane middPane = new Pane();
         VBox vBox = new VBox();
 
-        readTasks_FROM_csv readTasks_from_csv = main.getReadTasksFromCsv();
+        readTasksFromCsv readTasks_from_csv = main.getReadTasksFromCsv();
         tasks = readTasks_from_csv.readtasks();
-        for(String[] task: tasks){
+        for(Task task: tasks){
             task_card task_card = new task_card(task);
             Pane task_card_pane = task_card.getTaskCard();
             vBox.getChildren().add(task_card_pane);
