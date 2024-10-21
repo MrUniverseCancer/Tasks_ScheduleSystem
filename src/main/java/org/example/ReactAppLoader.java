@@ -6,8 +6,8 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
-import org.cef.browser.CefRendering;
 import org.cef.browser.CefMessageRouter;
+import org.cef.browser.CefRendering;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,37 +18,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ReactAppLoader extends JFrame {
-    private final CefApp cefApp;
-    private final CefClient client;
-    private final CefBrowser browser;
     private static final int PORT = 8009;
     private static final String BASE_DIR = "out";
 
     public ReactAppLoader(String reactAppPath) {
-        // 1. 初始化JCEF配置
         final JCefAppConfig jCefAppConfig = JCefAppConfig.getInstance();
         final CefSettings cefSettings = jCefAppConfig.getCefSettings();
-
-        // 2. 启动CEF
         CefApp.startup(jCefAppConfig.getAppArgs());
-        cefApp = CefApp.getInstance(jCefAppConfig.getAppArgs(), cefSettings);
-
-        // 3. 创建客户端
-        client = cefApp.createClient();
-
-        // 4. 设置消息路由器（如果需要JavaScript通信）
+        CefApp cefApp = CefApp.getInstance(jCefAppConfig.getAppArgs(), cefSettings);
+        CefClient client = cefApp.createClient();
         CefMessageRouter messageRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig());
-        // 注册Java桥接类
         messageRouter.addHandler(new JcefTodoBridge(), true);
         client.addMessageRouter(messageRouter);
-
-        // 7. 创建浏览器实例（使用新的创建方式）
         String url = "http://localhost:" + PORT + "/index.html";
         System.out.println("访问的URL: " + url);
-        browser = client.createBrowser(url, CefRendering.DEFAULT, true);
+        CefBrowser browser = client.createBrowser(url, CefRendering.DEFAULT, true);
         Component browserUI = browser.getUIComponent();
-
-        // 8. 设置窗口属性
         setTitle("Test");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         add(browserUI);
@@ -61,8 +46,6 @@ public class ReactAppLoader extends JFrame {
         server.createContext("/", exchange -> {
             String filePath = BASE_DIR + exchange.getRequestURI().getPath();
             File file = new File(filePath);
-            System.out.println("访问的绝对路径: " + file.getAbsolutePath());
-
             if (file.exists() && !file.isDirectory()) {
                 byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
                 exchange.sendResponseHeaders(200, fileBytes.length);
@@ -79,10 +62,7 @@ public class ReactAppLoader extends JFrame {
 
     public static void main(String[] args) throws IOException {
         startHttpServer();
-        // 设置React应用的绝对路径
         String reactAppPath = System.getProperty("user.dir") + "/web";
-        System.out.println("React App Path: " + reactAppPath);
-
         SwingUtilities.invokeLater(() -> {
             ReactAppLoader frame = new ReactAppLoader(reactAppPath);
             frame.setVisible(true);

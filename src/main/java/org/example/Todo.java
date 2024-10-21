@@ -9,14 +9,16 @@ public class Todo {
     private String dueDate;
     private int importance;
     private String list;
+    private int list_id;
 
-    public Todo(int id, String title, boolean completed, String dueDate, int importance, String list) {
+    public Todo(int id, String title, boolean completed, String dueDate, int importance, String list, int list_id) {
         this.id = id;
         this.title = title;
         this.completed = completed;
         this.dueDate = dueDate;
         this.importance = importance;
         this.list = list;
+        this.list_id = list_id;
     }
 
     // Getters
@@ -44,6 +46,10 @@ public class Todo {
         return list;
     }
 
+    public int getListId() {
+        return list_id;
+    }
+
     // Setters
     public void setTitle(String title) {
         this.title = title;
@@ -65,6 +71,10 @@ public class Todo {
         this.list = list;
     }
 
+    public void setListId(int list_id) {
+        this.list_id = list_id;
+    }
+
     // 将Todo对象转换为JSON格式
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
@@ -74,6 +84,7 @@ public class Todo {
         json.put("dueDate", dueDate);
         json.put("importance", importance);
         json.put("list", list);
+        json.put("list_id", list_id);
         return json;
     }
 }
