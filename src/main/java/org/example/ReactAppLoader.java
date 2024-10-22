@@ -30,7 +30,8 @@ public class ReactAppLoader extends JFrame {
         CefMessageRouter messageRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig());
         messageRouter.addHandler(new JcefTodoBridge(), true);
         client.addMessageRouter(messageRouter);
-        String url = "http://localhost:" + PORT + "/index.html";
+//        String url = "http://localhost:" + PORT + "/index.html";
+        String url = "http://localhost:3000";
         System.out.println("访问的URL: " + url);
         CefBrowser browser = client.createBrowser(url, CefRendering.DEFAULT, true);
         Component browserUI = browser.getUIComponent();
@@ -61,7 +62,7 @@ public class ReactAppLoader extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
-        startHttpServer();
+//        startHttpServer();
         String reactAppPath = System.getProperty("user.dir") + "/web";
         SwingUtilities.invokeLater(() -> {
             ReactAppLoader frame = new ReactAppLoader(reactAppPath);
