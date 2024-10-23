@@ -1,14 +1,14 @@
 'use client'
 
-import React, {useEffect, useState} from 'react';
-import {Edit, Menu, Plus, Search, Settings, Trash, X} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Edit, Menu, Plus, Search, Settings, Trash, X, Check } from 'lucide-react';
 import SettingsPage from './SettingsPage';
 import TodoView from './TodoView';
 import QuadrantsUI from './Quadrants';
 import SearchBox from './SearchBox';
 import SearchResultsPage from './SearchResultsPage';
 import * as jcefBridge from './jcefBridge';
-import {Todo as JcefTodo} from './jcefBridge';
+import { Todo as JcefTodo } from './jcefBridge';
 
 
 interface ViewState {
@@ -154,7 +154,7 @@ export default function TodoApp() {
             const newDirection = sortState.criteria === criteria && sortState.direction === 'desc' ? 'asc' : 'desc';
             const sortedTasks = await jcefBridge.sortTodos(criteria, newDirection);
             setTasks(sortedTasks);
-            setSortState({criteria, direction: newDirection});
+            setSortState({ criteria, direction: newDirection });
         } catch (err) {
             if (err instanceof Error) {
                 setError('Failed to sort tasks: ' + err.message);
@@ -163,8 +163,7 @@ export default function TodoApp() {
             }
         }
     };
-    const handleCreateList = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleCreateList = async () => {
         if (newListName.trim()) {
             if (lists.some(list => list.name.toLowerCase() === newListName.trim().toLowerCase())) {
                 alert('A list with this name already exists. Please choose a different name.');
@@ -201,7 +200,7 @@ export default function TodoApp() {
                     name: editListName.trim(),
                     icon: typeof listToUpdate.icon === 'string' ? listToUpdate.icon : '•'
                 });
-                setLists(lists.map(list => list.id === editingListId ? {...updatedList, icon: list.icon} : list));
+                setLists(lists.map(list => list.id === editingListId ? { ...updatedList, icon: list.icon } : list));
                 setEditingListId(null);
                 setEditListName('');
                 setCurrentList(updatedList.name);
@@ -386,7 +385,7 @@ export default function TodoApp() {
                                                     onClick={() => setEditingListId(null)}
                                                     className="ml-2 text-gray-500 hover:text-gray-700"
                                                 >
-                                                    <X size={16}/>
+                                                    <X size={16} />
                                                 </button>
                                             </div>
                                         </form>
@@ -394,8 +393,8 @@ export default function TodoApp() {
                                         <div
                                             className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 
                                         ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
-                                                ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
-                                                : ''}`}
+                                                    ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
+                                                    : ''}`}
                                         >
                                             <div
                                                 className="flex items-center flex-grow cursor-pointer"
@@ -413,13 +412,13 @@ export default function TodoApp() {
                                                             onClick={() => handleEditList(list)}
                                                             className="p-1 text-gray-500 hover:text-blue-600"
                                                         >
-                                                            <Edit size={16}/>
+                                                            <Edit size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteList(list.id)}
                                                             className="p-1 text-gray-500 hover:text-red-600"
                                                         >
-                                                            <Trash size={16}/>
+                                                            <Trash size={16} />
                                                         </button>
                                                     </div>
                                                 )}
@@ -434,31 +433,38 @@ export default function TodoApp() {
                         </nav>
                         <div className="p-4 border-t">
                             {isCreatingList ? (
-                                <form onSubmit={handleCreateList} className="px-4 py-2">
+                                <div className="px-4 py-2">
                                     <div className="flex items-center bg-gray-100 rounded-lg p-2">
                                         <input
                                             type="text"
                                             value={newListName}
                                             onChange={(e) => setNewListName(e.target.value)}
                                             placeholder="列表名称"
-                                            className="flex-1 bg-transparent focus:outline-none"
+                                            className="flex-grow flex-shrink min-w-0 bg-transparent focus:outline-none"
                                             autoFocus
                                         />
                                         <button
                                             type="button"
-                                            onClick={handleCancelCreate}
-                                            className="ml-2 text-gray-500 hover:text-gray-700"
+                                            onClick={handleCreateList}
+                                            className="ml-2 text-gray-500 hover:text-green-600 flex-shrink-0"
                                         >
-                                            <X size={16}/>
+                                            <Check size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelCreate}
+                                            className="ml-2 text-gray-500 hover:text-green-600 flex-shrink-0"
+                                        >
+                                            <X size={16} />
                                         </button>
                                     </div>
-                                </form>
+                                </div>
                             ) : (
                                 <button
                                     onClick={() => setIsCreatingList(true)}
                                     className="flex items-center text-blue-600 hover:bg-gray-100 w-full px-4 py-2 rounded-lg whitespace-nowrap"
                                 >
-                                    <Plus size={20} className="mr-2 flex-shrink-0"/>
+                                    <Plus size={20} className="mr-2 flex-shrink-0" />
                                     <span>新建列表</span>
                                 </button>
                             )}
@@ -474,7 +480,7 @@ export default function TodoApp() {
                             onClick={toggleSidebar}
                             className="hover:bg-blue-700 p-1 rounded"
                         >
-                            <Menu className="mr-4"/>
+                            <Menu className="mr-4" />
                         </button>
                         <h2 className="text-xl font-semibold">To Do</h2>
                     </div>
@@ -488,7 +494,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'quadrants'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
                             <div className={`grid grid-cols-2 gap-0.5`}>
                                 <div className="w-2 h-2 bg-current rounded-sm"></div>
@@ -502,18 +508,18 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'settings'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
-                            <Settings size={20}/>
+                            <Settings size={20} />
                         </button>
                         <button
                             onClick={() => handleSearchSubmit(searchQuery)}
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'searchResults'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
-                            <Search size={20}/>
+                            <Search size={20} />
                         </button>
                         <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center ml-2">
                             <span className="text-white font-bold">U</span>
@@ -555,7 +561,7 @@ export default function TodoApp() {
                                 onBack={handleBackFromSearch}
                             />
                         ) : (
-                            <QuadrantsUI/>
+                            <QuadrantsUI />
                         )}
                     </>
                 )}
