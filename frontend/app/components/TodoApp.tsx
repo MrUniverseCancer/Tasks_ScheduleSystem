@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Edit, Menu, Plus, Search, Settings, Trash, X, Check } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {Check, Edit, Menu, Plus, Search, Settings, Trash, X} from 'lucide-react';
 import SettingsPage from './SettingsPage';
 import TodoView from './TodoView';
 import QuadrantsUI from './Quadrants';
 import SearchBox from './SearchBox';
 import SearchResultsPage from './SearchResultsPage';
 import * as jcefBridge from './jcefBridge';
-import { Todo as JcefTodo } from './jcefBridge';
+import {Todo as JcefTodo} from './jcefBridge';
 
 
 interface ViewState {
@@ -31,6 +31,7 @@ interface SortState {
 }
 
 export default function TodoApp() {
+    const [allTasks, setAllTasks] = useState<JcefTodo[]>([]);
     const [tasks, setTasks] = useState<JcefTodo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -57,6 +58,14 @@ export default function TodoApp() {
         loadTasks();
     }, []);
 
+    useEffect(() => {
+        const selectedList = lists.find(list => list.name === currentList);
+        if (selectedList) {
+            setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+        }
+    }, [currentList, allTasks]);
+
+
     const loadLists = async () => {
         try {
             const loadedLists = await jcefBridge.getAllLists();
@@ -70,15 +79,17 @@ export default function TodoApp() {
         }
     };
 
-    useEffect(() => {
-        loadTasks();
-    }, []);
-
     const loadTasks = async () => {
         try {
             setLoading(true);
             const loadedTasks = await jcefBridge.getAllTodos();
-            setTasks(loadedTasks);
+            setAllTasks(loadedTasks);
+            const selectedList = lists.find(list => list.name === currentList);
+            if (selectedList) {
+                setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+            } else {
+                setTasks(loadedTasks);
+            }
             setError(null);
         } catch (err) {
             if (err instanceof Error) {
@@ -99,9 +110,12 @@ export default function TodoApp() {
             const addedTask = await jcefBridge.addTodo({
                 ...newTask,
                 list_id: currentListId,
-                list: currentList // 确保前端显示用的list字段正确设置
+                list: currentList
             });
-            setTasks([...tasks, addedTask]);
+            setAllTasks([...allTasks, addedTask]);
+            if (addedTask.list === currentList) {
+                setTasks([...tasks, addedTask]);
+            }
         } catch (err) {
             if (err instanceof Error) {
                 setError('Failed to add task: ' + err.message);
@@ -113,13 +127,16 @@ export default function TodoApp() {
 
     const toggleComplete = async (id: number) => {
         try {
-            const taskToUpdate = tasks.find(task => task.id === id);
+            const taskToUpdate = allTasks.find(task => task.id === id);
             if (taskToUpdate) {
                 const updatedTask = await jcefBridge.updateTodo({
                     ...taskToUpdate,
                     completed: !taskToUpdate.completed
                 });
-                setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                setAllTasks(allTasks.map(task => task.id === id ? updatedTask : task));
+                if (updatedTask.list === currentList) {
+                    setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                }
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -152,9 +169,15 @@ export default function TodoApp() {
     const handleSortChange = async (criteria: SortOption['value']) => {
         try {
             const newDirection = sortState.criteria === criteria && sortState.direction === 'desc' ? 'asc' : 'desc';
-            const sortedTasks = await jcefBridge.sortTodos(criteria, newDirection);
-            setTasks(sortedTasks);
+            const sortedAllTasks = await jcefBridge.sortTodos(criteria, newDirection);
+            setAllTasks(sortedAllTasks);
             setSortState({ criteria, direction: newDirection });
+
+            // 更新当前显示的任务列表
+            const selectedList = lists.find(list => list.name === currentList);
+            if (selectedList) {
+                setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+            }
         } catch (err) {
             if (err instanceof Error) {
                 setError('Failed to sort tasks: ' + err.message);
@@ -163,6 +186,7 @@ export default function TodoApp() {
             }
         }
     };
+
     const handleCreateList = async () => {
         if (newListName.trim()) {
             if (lists.some(list => list.name.toLowerCase() === newListName.trim().toLowerCase())) {
@@ -247,22 +271,9 @@ export default function TodoApp() {
     }
 
     const getListCount = (listName: string): number => {
-        return tasks.filter(task => task.list === listName).length
+        return allTasks.filter(task => task.list === listName).length;
     }
 
-    // const filteredTasks = tasks.filter(task => task.list === currentList)
-
-    // const filteredAndSortedTasks = filteredTasks.sort((a, b) => {
-    //     let comparison = 0
-    //     if (sortState.criteria === 'importance') {
-    //         comparison = b.importance - a.importance
-    //     } else if (sortState.criteria === 'dueDate') {
-    //         comparison = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-    //     } else {
-    //         comparison = a.title.localeCompare(b.title)
-    //     }
-    //     return sortState.direction === 'asc' ? comparison : -comparison
-    // })
 
     const handleSettingsClick = () => {
         setViewState(() => ({
@@ -300,7 +311,7 @@ export default function TodoApp() {
         setHasUnsavedSettings(false);
     };
 
-    const handleListClick = async (listName: string) => {
+    const handleListClick = (listName: string) => {
         if (viewState.currentView === 'settings' && hasUnsavedSettings) {
             if (window.confirm('You have unsaved settings. Do you want to save before switching to the todo view?')) {
                 handleSettingsSave();
@@ -313,14 +324,9 @@ export default function TodoApp() {
             ...prevState,
             currentView: 'todo'
         }));
-        try {
-            const selectedList = lists.find(list => list.name === listName);
-            if (selectedList) {
-                const tasksForList = await jcefBridge.getAllTodos();
-                setTasks(tasksForList.filter(task => task.list_id === selectedList.id));
-            }
-        } catch (err) {
-            setError('Failed to load tasks for the selected list: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
+        const selectedList = lists.find(list => list.name === listName);
+        if (selectedList) {
+            setTasks(allTasks.filter(task => task.list_id === selectedList.id));
         }
     };
 
@@ -337,25 +343,26 @@ export default function TodoApp() {
     };
 
     const handleSearchViewMore = () => {
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'searchResults'
+            currentView: 'searchResults',
         }));
     };
 
     const handleSearchSubmit = (query: string) => {
         setSearchQuery(query);
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'searchResults'
+            currentView: 'searchResults',
         }));
     };
 
     const handleBackFromSearch = () => {
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'todo'
+            currentView: 'todo',
         }));
+        setSearchQuery('');
     };
 
     return (
@@ -392,17 +399,17 @@ export default function TodoApp() {
                                     ) : (
                                         <div
                                             className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 
-                                        ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
-                                                    ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
-                                                    : ''}`}
+                                    ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
+                                                ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
+                                                : ''}`}
                                         >
                                             <div
                                                 className="flex items-center flex-grow cursor-pointer"
                                                 onClick={() => handleListClick(list.name)}
                                             >
-                                                <span className="mr-2 flex-shrink-0">
-                                                    {list.icon}
-                                                </span>
+                                            <span className="mr-2 flex-shrink-0">
+                                                {list.icon}
+                                            </span>
                                                 <span className="flex-grow">{list.name}</span>
                                             </div>
                                             <div className="flex items-center">
@@ -423,8 +430,8 @@ export default function TodoApp() {
                                                     </div>
                                                 )}
                                                 <span className="ml-auto">
-                                                    {getListCount(list.name)}
-                                                </span>
+                                                {getListCount(list.name)}
+                                            </span>
                                             </div>
                                         </div>
                                     )}
@@ -487,6 +494,9 @@ export default function TodoApp() {
                     <SearchBox
                         onSearch={handleSearchSubmit}
                         onViewMore={handleSearchViewMore}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        isSearchResultsPage={viewState.currentView === 'searchResults'}
                     />
                     <div className="flex items-center">
                         <button
@@ -494,7 +504,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'quadrants'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <div className={`grid grid-cols-2 gap-0.5`}>
                                 <div className="w-2 h-2 bg-current rounded-sm"></div>
@@ -508,7 +518,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'settings'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <Settings size={20} />
                         </button>
@@ -517,7 +527,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'searchResults'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <Search size={20} />
                         </button>
@@ -527,7 +537,6 @@ export default function TodoApp() {
                     </div>
                 </header>
 
-                {/* 根据加载状态、错误状态和视图渲染 */}
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         <p>Loading tasks...</p>
@@ -540,7 +549,7 @@ export default function TodoApp() {
                     <>
                         {viewState.currentView === 'todo' ? (
                             <TodoView
-                                tasks={tasks.filter(task => task.list === currentList)}
+                                tasks={tasks.filter((task) => task.list === currentList)}
                                 currentList={currentList}
                                 onAddTask={handleAddTask}
                                 onToggleComplete={toggleComplete}
@@ -557,7 +566,7 @@ export default function TodoApp() {
                             />
                         ) : viewState.currentView === 'searchResults' ? (
                             <SearchResultsPage
-                                initialQuery={searchQuery}
+                                searchQuery={searchQuery}
                                 onBack={handleBackFromSearch}
                             />
                         ) : (

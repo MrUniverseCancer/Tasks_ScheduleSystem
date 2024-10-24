@@ -52,6 +52,9 @@ public class JcefTodoBridge implements CefMessageRouterHandler {
                     todoManager.deleteList(jsonRequest.getInt("id"));
                     callback.success("{\"success\": true}");
                     return true;
+                case "searchTodos":
+                    callback.success(todoManager.searchTodos(jsonRequest.getString("query")).toString());
+                    return true;
                 default:
                     callback.failure(0, "Unknown action");
                     return true;

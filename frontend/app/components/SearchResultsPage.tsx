@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ArrowLeft, Search} from 'lucide-react';
+import {ArrowLeft, Calendar, List, Search} from 'lucide-react';
+import * as jcefBridge from './jcefBridge';
 
 interface SearchResult {
     id: number;
@@ -8,61 +9,88 @@ interface SearchResult {
 }
 
 interface SearchResultsPageProps {
-    initialQuery: string;
+    searchQuery: string;
     onBack: () => void;
 }
 
-const SearchResultsPage: React.FC<SearchResultsPageProps> = ({initialQuery, onBack}) => {
-    const [searchQuery, setSearchQuery] = useState(initialQuery);
+const SearchResultsPage: React.FC<SearchResultsPageProps> = ({searchQuery, onBack}) => {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
-    // Sample search results (replace with actual search logic later)
-    const sampleSearchResults: SearchResult[] = [
-        {id: 1, title: 'Add task to project', list: 'Work'},
-        {id: 2, title: 'Buy groceries for a dinner', list: 'Personal'},
-        {id: 3, title: 'Prepare presentation for meeting', list: 'Work'},
-        {id: 4, title: 'Call mom', list: 'Personal'},
-        {id: 5, title: 'Review quarterly report', list: 'Work'},
-    ];
-
     useEffect(() => {
-        // Simulate search (replace with actual search logic later)
-        const filteredResults = sampleSearchResults.filter(result =>
-            result.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filteredResults);
-    }, [searchQuery, sampleSearchResults]);
+        const fetchSearchResults = async () => {
+            if (searchQuery.trim()) {
+                try {
+                    const results = await jcefBridge.searchTodos(searchQuery);
+                    setSearchResults(results);
+                } catch (err) {
+                    console.error('Failed to search todos:', err);
+                }
+            } else {
+                setSearchResults([]);
+            }
+        };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-    };
+        fetchSearchResults();
+    }, [searchQuery]);
 
     return (
-        <div className="p-4">
-            <div className="flex items-center mb-4">
-                <button onClick={onBack} className="mr-4">
-                    <ArrowLeft size={24}/>
-                </button>
-                <div className="relative flex-grow">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        placeholder="搜索"
-                        className="w-full p-2 pl-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
+        <div className="min-h-screen bg-gray-50">
+            {/* 头部区域 */}
+            <div className="sticky top-0 bg-white shadow-sm z-10">
+                <div className="max-w-3xl mx-auto px-4 py-3">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={onBack}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5 text-gray-600"/>
+                        </button>
+                        {/* 可选地显示搜索查询 */}
+                        <h1 className="text-xl font-semibold">{searchQuery}</h1>
+                    </div>
                 </div>
             </div>
-            <div>
-                {searchResults.map((result) => (
-                    <div key={result.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md">
-                        <span className="truncate flex-grow mr-2">{result.title}</span>
-                        <span className="text-gray-500 text-sm truncate w-20 text-right">{result.list}</span>
+
+            {/* 结果区域 */}
+            <div className="max-w-3xl mx-auto px-4 py-6">
+                {searchResults.length > 0 && (
+                    <div className="text-sm text-gray-500 mb-4">找到 {searchResults.length} 个结果</div>
+                )}
+
+                <div className="space-y-4">
+                    {searchResults.map((result) => (
+                        <div
+                            key={result.id}
+                            className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex-grow">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">{result.title}</h3>
+                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                        <div className="flex items-center gap-1">
+                                            <List className="w-4 h-4"/>
+                                            <span>{result.list}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="w-4 h-4"/>
+                                            <span>Today</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {searchResults.length === 0 && searchQuery.trim() && (
+                    <div className="text-center py-12">
+                        <div
+                            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                            <Search className="w-8 h-8 text-gray-400"/>
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">未找到结果</h3>
+                        <p className="text-gray-500">试试使用其他关键词搜索</p>
                     </div>
-                ))}
-                {searchResults.length === 0 && (
-                    <p className="text-center text-gray-500 mt-4">No results found</p>
                 )}
             </div>
         </div>

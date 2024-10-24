@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ChevronRight, Search} from 'lucide-react';
+import * as jcefBridge from './jcefBridge';
 
 interface SearchResult {
     id: number;
@@ -10,22 +11,21 @@ interface SearchResult {
 interface SearchBoxProps {
     onSearch: (query: string) => void;
     onViewMore: () => void;
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    isSearchResultsPage: boolean;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
+const SearchBox: React.FC<SearchBoxProps> = ({
+                                                 onSearch,
+                                                 onViewMore,
+                                                 searchQuery,
+                                                 setSearchQuery,
+                                                 isSearchResultsPage,
+                                             }) => {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const searchRef = useRef<HTMLDivElement>(null);
-
-    // Sample search results (replace with actual search logic later)
-    const sampleSearchResults: SearchResult[] = [
-        {id: 1, title: 'Add task to project', list: 'Work'},
-        {id: 2, title: 'Buy groceries for a dinner', list: 'Personal'},
-        {id: 3, title: 'Prepare presentation for meeting', list: 'Work'},
-        {id: 4, title: 'Call mom', list: 'Personal'},
-        {id: 5, title: 'Review quarterly report', list: 'Work'},
-    ];
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -44,15 +44,20 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
         setIsSearchFocused(true);
     };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
 
-        // Filter sample results based on query (replace with actual search logic later)
-        const filteredResults = sampleSearchResults.filter(result =>
-            result.title.toLowerCase().includes(query.toLowerCase())
-        );
-        setSearchResults(filteredResults);
+        if (!isSearchResultsPage && query.trim()) {
+            try {
+                const results = await jcefBridge.searchTodos(query);
+                setSearchResults(results);
+            } catch (err) {
+                console.error('Failed to search todos:', err);
+            }
+        } else {
+            setSearchResults([]);
+        }
     };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -63,7 +68,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
     return (
         <div
             ref={searchRef}
-            className={`relative flex items-center bg-white rounded-md transition-all duration-300 ease-in-out ${isSearchFocused ? 'w-96' : 'w-64'
+            className={`relative flex items-center bg-white rounded-md transition-all duration-300 ease-in-out ${
+                isSearchFocused ? 'w-96' : 'w-64'
             }`}
         >
             <form onSubmit={handleSearchSubmit} className="flex items-center w-full">
@@ -77,7 +83,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
                     onChange={handleSearchChange}
                 />
             </form>
-            {isSearchFocused && searchQuery && (
+            {isSearchFocused && searchQuery && !isSearchResultsPage && (
                 <div className="absolute top-full left-0 w-full bg-white mt-1 rounded-md shadow-lg z-10">
                     {searchResults.slice(0, 4).map((result) => (
                         <div key={result.id} className="flex items-center justify-between p-2 hover:bg-gray-100">

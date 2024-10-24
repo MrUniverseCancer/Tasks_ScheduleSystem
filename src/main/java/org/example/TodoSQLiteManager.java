@@ -183,6 +183,7 @@ public class TodoSQLiteManager {
         todoJson.put("dueDate", rs.getString("dueDate"));
         todoJson.put("importance", rs.getInt("importance"));
         todoJson.put("list_id", rs.getInt("list_id"));
+        todoJson.put("list", rs.getString("list_name"));
         return todoJson;
     }
 
@@ -200,7 +201,7 @@ public class TodoSQLiteManager {
 
     public JSONArray getAllTodos() {
         JSONArray todosJson = new JSONArray();
-        String sql = "SELECT * FROM todos";
+        String sql = "SELECT todos.*, lists.name AS list_name FROM todos LEFT JOIN lists ON todos.list_id = lists.id";
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -214,7 +215,7 @@ public class TodoSQLiteManager {
     }
 
     public JSONObject getTodo(int id) {
-        String sql = "SELECT * FROM todos WHERE id = ?";
+        String sql = "SELECT todos.*, lists.name AS list_name FROM todos LEFT JOIN lists ON todos.list_id = lists.id WHERE todos.id = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
@@ -242,6 +243,27 @@ public class TodoSQLiteManager {
             e.printStackTrace();
         }
         return sortedTodosJson;
+    }
+
+    public JSONArray searchTodos(String query) {
+        String sql = "SELECT todos.*, lists.name AS list_name FROM todos " +
+                "LEFT JOIN lists ON todos.list_id = lists.id " +
+                "WHERE todos.title LIKE ? OR lists.name LIKE ?";
+        JSONArray searchResults = new JSONArray();
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String likeQuery = "%" + query + "%";
+            pstmt.setString(1, likeQuery);
+            pstmt.setString(2, likeQuery);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    searchResults.put(resultSetToJson(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return searchResults;
     }
 
     public void populateExampleData() {

@@ -81,3 +81,8 @@ export const updateList = async (list: List): Promise<List> => {
 export const deleteList = async (id: number): Promise<void> => {
     await callBridge<void>('deleteList', {id});
 };
+
+export const searchTodos = async (query: string): Promise<Todo[]> => {
+    return callBridge<Todo[]>('searchTodos', {query});
+};
+
