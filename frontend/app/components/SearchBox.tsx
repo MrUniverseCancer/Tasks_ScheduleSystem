@@ -11,11 +11,19 @@ interface SearchResult {
 interface SearchBoxProps {
     onSearch: (query: string) => void;
     onViewMore: () => void;
+    searchQuery: string;
+    setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    isSearchResultsPage: boolean;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
+const SearchBox: React.FC<SearchBoxProps> = ({
+                                                 onSearch,
+                                                 onViewMore,
+                                                 searchQuery,
+                                                 setSearchQuery,
+                                                 isSearchResultsPage,
+                                             }) => {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const searchRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +48,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
         const query = e.target.value;
         setSearchQuery(query);
 
-        if (query.trim()) {
+        if (!isSearchResultsPage && query.trim()) {
             try {
                 const results = await jcefBridge.searchTodos(query);
                 setSearchResults(results);
@@ -60,7 +68,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
     return (
         <div
             ref={searchRef}
-            className={`relative flex items-center bg-white rounded-md transition-all duration-300 ease-in-out ${isSearchFocused ? 'w-96' : 'w-64'
+            className={`relative flex items-center bg-white rounded-md transition-all duration-300 ease-in-out ${
+                isSearchFocused ? 'w-96' : 'w-64'
             }`}
         >
             <form onSubmit={handleSearchSubmit} className="flex items-center w-full">
@@ -74,7 +83,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
                     onChange={handleSearchChange}
                 />
             </form>
-            {isSearchFocused && searchQuery && (
+            {isSearchFocused && searchQuery && !isSearchResultsPage && (
                 <div className="absolute top-full left-0 w-full bg-white mt-1 rounded-md shadow-lg z-10">
                     {searchResults.slice(0, 4).map((result) => (
                         <div key={result.id} className="flex items-center justify-between p-2 hover:bg-gray-100">

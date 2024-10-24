@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, {useEffect, useState} from 'react';
 import {Check, Edit, Menu, Plus, Search, Settings, Trash, X} from 'lucide-react';
@@ -343,25 +343,26 @@ export default function TodoApp() {
     };
 
     const handleSearchViewMore = () => {
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'searchResults'
+            currentView: 'searchResults',
         }));
     };
 
     const handleSearchSubmit = (query: string) => {
         setSearchQuery(query);
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'searchResults'
+            currentView: 'searchResults',
         }));
     };
 
     const handleBackFromSearch = () => {
-        setViewState(prevState => ({
+        setViewState((prevState) => ({
             ...prevState,
-            currentView: 'todo'
+            currentView: 'todo',
         }));
+        setSearchQuery('');
     };
 
     return (
@@ -398,17 +399,17 @@ export default function TodoApp() {
                                     ) : (
                                         <div
                                             className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 
-                                        ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
-                                                    ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
-                                                    : ''}`}
+                                    ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
+                                                ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
+                                                : ''}`}
                                         >
                                             <div
                                                 className="flex items-center flex-grow cursor-pointer"
                                                 onClick={() => handleListClick(list.name)}
                                             >
-                                                <span className="mr-2 flex-shrink-0">
-                                                    {list.icon}
-                                                </span>
+                                            <span className="mr-2 flex-shrink-0">
+                                                {list.icon}
+                                            </span>
                                                 <span className="flex-grow">{list.name}</span>
                                             </div>
                                             <div className="flex items-center">
@@ -429,8 +430,8 @@ export default function TodoApp() {
                                                     </div>
                                                 )}
                                                 <span className="ml-auto">
-                                                    {getListCount(list.name)}
-                                                </span>
+                                                {getListCount(list.name)}
+                                            </span>
                                             </div>
                                         </div>
                                     )}
@@ -493,6 +494,9 @@ export default function TodoApp() {
                     <SearchBox
                         onSearch={handleSearchSubmit}
                         onViewMore={handleSearchViewMore}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        isSearchResultsPage={viewState.currentView === 'searchResults'}
                     />
                     <div className="flex items-center">
                         <button
@@ -500,7 +504,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'quadrants'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <div className={`grid grid-cols-2 gap-0.5`}>
                                 <div className="w-2 h-2 bg-current rounded-sm"></div>
@@ -514,7 +518,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'settings'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <Settings size={20} />
                         </button>
@@ -523,7 +527,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'searchResults'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                                }`}
+                            }`}
                         >
                             <Search size={20} />
                         </button>
@@ -533,7 +537,6 @@ export default function TodoApp() {
                     </div>
                 </header>
 
-                {/* 根据加载状态、错误状态和视图渲染 */}
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         <p>Loading tasks...</p>
@@ -546,7 +549,7 @@ export default function TodoApp() {
                     <>
                         {viewState.currentView === 'todo' ? (
                             <TodoView
-                                tasks={tasks.filter(task => task.list === currentList)}
+                                tasks={tasks.filter((task) => task.list === currentList)}
                                 currentList={currentList}
                                 onAddTask={handleAddTask}
                                 onToggleComplete={toggleComplete}
@@ -563,7 +566,7 @@ export default function TodoApp() {
                             />
                         ) : viewState.currentView === 'searchResults' ? (
                             <SearchResultsPage
-                                initialQuery={searchQuery}
+                                searchQuery={searchQuery}
                                 onBack={handleBackFromSearch}
                             />
                         ) : (
