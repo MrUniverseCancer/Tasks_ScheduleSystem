@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ArrowLeft, Search} from 'lucide-react';
+import * as jcefBridge from './jcefBridge';
 
 interface SearchResult {
     id: number;
@@ -16,22 +17,23 @@ const SearchResultsPage: React.FC<SearchResultsPageProps> = ({initialQuery, onBa
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
-    // Sample search results (replace with actual search logic later)
-    const sampleSearchResults: SearchResult[] = [
-        {id: 1, title: 'Add task to project', list: 'Work'},
-        {id: 2, title: 'Buy groceries for a dinner', list: 'Personal'},
-        {id: 3, title: 'Prepare presentation for meeting', list: 'Work'},
-        {id: 4, title: 'Call mom', list: 'Personal'},
-        {id: 5, title: 'Review quarterly report', list: 'Work'},
-    ];
-
     useEffect(() => {
-        // Simulate search (replace with actual search logic later)
-        const filteredResults = sampleSearchResults.filter(result =>
-            result.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filteredResults);
-    }, [searchQuery, sampleSearchResults]);
+        const fetchSearchResults = async () => {
+            if (searchQuery.trim()) {
+                try {
+                    const results = await jcefBridge.searchTodos(searchQuery);
+                    setSearchResults(results);
+                } catch (err) {
+                    console.error('Failed to search todos:', err);
+                }
+            } else {
+                setSearchResults([]);
+            }
+        };
+
+        fetchSearchResults();
+    }, [searchQuery]);
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);

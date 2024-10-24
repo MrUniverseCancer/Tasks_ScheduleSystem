@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ChevronRight, Search} from 'lucide-react';
+import * as jcefBridge from './jcefBridge';
 
 interface SearchResult {
     id: number;
@@ -18,15 +19,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const searchRef = useRef<HTMLDivElement>(null);
 
-    // Sample search results (replace with actual search logic later)
-    const sampleSearchResults: SearchResult[] = [
-        {id: 1, title: 'Add task to project', list: 'Work'},
-        {id: 2, title: 'Buy groceries for a dinner', list: 'Personal'},
-        {id: 3, title: 'Prepare presentation for meeting', list: 'Work'},
-        {id: 4, title: 'Call mom', list: 'Personal'},
-        {id: 5, title: 'Review quarterly report', list: 'Work'},
-    ];
-
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -44,15 +36,20 @@ const SearchBox: React.FC<SearchBoxProps> = ({onSearch, onViewMore}) => {
         setIsSearchFocused(true);
     };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
 
-        // Filter sample results based on query (replace with actual search logic later)
-        const filteredResults = sampleSearchResults.filter(result =>
-            result.title.toLowerCase().includes(query.toLowerCase())
-        );
-        setSearchResults(filteredResults);
+        if (query.trim()) {
+            try {
+                const results = await jcefBridge.searchTodos(query);
+                setSearchResults(results);
+            } catch (err) {
+                console.error('Failed to search todos:', err);
+            }
+        } else {
+            setSearchResults([]);
+        }
     };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
