@@ -50,23 +50,29 @@ export default function QuadrantsUI() {
         const maxTimeFrame = 1000 * 60 * 60 * 24 * 30 // 30 days
         const urgency = Math.max(0, Math.min(100, (1 - timeUntilDue / maxTimeFrame) * 100))
 
-        // Get quadrant color
-        let color = ""
-        if (task.importance >= 50 && urgency >= 50) {
-            color = "#dc2626"  // bg-red-600
-        } else if (task.importance >= 50 && urgency < 50) {
-            color = "#2563eb" // bg-blue-600
-        } else if (task.importance < 50 && urgency >= 50) {
-            color = "#ca8a04" // bg-yellow-600
-        } else {
-            color = "#16a34a" // bg-green-600
-        }
+        // 计算颜色和大小
+        const size = 30 + ((urgency > 50) ? urgency * 0.2 : 0); // 根据紧迫度设置大小，范围从20到30
+        const color = `hsl(${(1 - task.importance / 100) * 120}, 100%, 50%)`; // 绿色到红色的渐变
+
+        // // Get quadrant color
+        // let color = ""
+        // if (task.importance >= 50 && urgency >= 50) {
+        //     color = "#dc2626"  // bg-red-600
+        // } else if (task.importance >= 50 && urgency < 50) {
+        //     color = "#2563eb" // bg-blue-600
+        // } else if (task.importance < 50 && urgency >= 50) {
+        //     color = "#ca8a04" // bg-yellow-600
+        // } else {
+        //     color = "#16a34a" // bg-green-600
+        // }
 
         return {
             position: "absolute" as const,
-            right: `${task.importance}%`,
-            bottom: `${urgency}%`,
-            transform: "translate(-50%, -50%)",
+            right: `${(urgency)}%`,
+            bottom: `${task.importance}%`,
+            transform: "translate(50%, 50%)",
+            width:  `${size}px`,
+            height: `${size}px`,
             backgroundColor: color
         }
     }
@@ -134,7 +140,7 @@ export default function QuadrantsUI() {
                     <div
                         key={task.id}
                         style={getTaskPosition(task)}
-                        className="w-12 h-12 rounded-full text-white flex items-center justify-center cursor-pointer"
+                        className=" rounded-full text-black flex items-center justify-center cursor-pointer"
                         onClick={() => setSelectedTask(task)}
                     >
                         {task.id}
