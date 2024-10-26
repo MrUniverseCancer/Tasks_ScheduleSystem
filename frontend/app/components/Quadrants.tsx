@@ -51,29 +51,25 @@ export default function QuadrantsUI() {
         const urgency = Math.max(0, Math.min(100, (1 - timeUntilDue / maxTimeFrame) * 100))
 
         // 计算颜色和大小
-        const size = 30 + ((urgency > 50) ? urgency * 0.2 : 0); // 根据紧迫度设置大小，范围从20到30
+        const size = 40 + ((urgency > 50) ? (urgency-50) * 0.3 : 0); // 根据紧迫度设置大小，范围从30到45
         const color = `hsl(${(1 - task.importance / 100) * 120}, 100%, 50%)`; // 绿色到红色的渐变
 
-        // // Get quadrant color
-        // let color = ""
-        // if (task.importance >= 50 && urgency >= 50) {
-        //     color = "#dc2626"  // bg-red-600
-        // } else if (task.importance >= 50 && urgency < 50) {
-        //     color = "#2563eb" // bg-blue-600
-        // } else if (task.importance < 50 && urgency >= 50) {
-        //     color = "#ca8a04" // bg-yellow-600
-        // } else {
-        //     color = "#16a34a" // bg-green-600
-        // }
+        // 由于圆心对齐边界会超出，做0.95收缩处理
+        const processInteger = (value: number): number => {
+            // 数学处理：平方输入值
+            return (value - 50) * 0.95 + 50;
+        };
 
         return {
             position: "absolute" as const,
-            right: `${(urgency)}%`,
-            bottom: `${task.importance}%`,
+            right: `${processInteger(urgency)}%`,
+            bottom: `${processInteger(task.importance)}%`,
             transform: "translate(50%, 50%)",
             width:  `${size}px`,
             height: `${size}px`,
-            backgroundColor: color
+            backgroundColor: color,
+            border: "1px solid black", // 添加黑色分界线
+            borderRadius: "50%" // 确保是圆形
         }
     }
     // const handleTaskClick = async (task: Task) => {
@@ -122,18 +118,19 @@ export default function QuadrantsUI() {
         <div className="w-full h-screen bg-gray-100 p-8">
             {/* Rest of the component remains the same */}
             <div className="w-full h-full bg-white rounded-lg shadow-lg relative">
-                <div className="absolute top-1/2 left-0 right-0 border-t-2 border-gray-400"></div>
-                <div className="absolute top-0 bottom-0 left-1/2 border-l-2 border-gray-400"></div>
-                <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-red-100"></div>
-                <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-yellow-100"></div>
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-blue-100"></div>
+                <div className="absolute top-0 left-0 right-4 border-t-4 border-gray-800"></div>
+                <div className="absolute top-0 bottom-0 left-0 border-l-4 border-gray-800"></div>
+                <div className="absolute top-1 left-1 w-1/2 h-1/2 bg-red-100"></div>
+                <div className="absolute top-1 right-0 w-1/2 h-1/2 bg-yellow-100"></div>
+                <div className="absolute bottom-0 left-1 w-1/2 h-1/2 bg-blue-100"></div>
                 <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-green-100"></div>
+                {/* 箭头 */}
+                <div className="absolute -top-2 right-2 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-800 transform -rotate-45" style={{ marginTop: '5px', marginRight: '8px' }}></div>
+                <div className="absolute -bottom-0 -left-0.5 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-800 transform rotate-45" style={{ marginTop: '5px', marginRight: 'px' }}></div>
 
                 <div className="absolute top-0 bottom-0 left-0 right-0">
-                    <span className="absolute left-4 top-1/2 bg-white px-2 transform -translate-y-1/2">重要</span>
-                    <span className="absolute right-4 top-1/2 bg-white px-2 transform -translate-y-1/2">不重要</span>
-                    <span className="absolute top-4 left-1/2 bg-white px-2 transform -translate-x-1/2">紧急</span>
-                    <span className="absolute bottom-4 left-1/2 bg-white px-2 transform -translate-x-1/2">不紧急</span>
+                    <span className="absolute -left-5 -bottom-10  px-2 transform -translate-y-1/2">重要性</span>
+                    <span className="absolute -top-6 -right-8  px-2 transform -translate-x-1/2">紧急性</span>
                 </div>
 
                 {tasks.map((task) => (
