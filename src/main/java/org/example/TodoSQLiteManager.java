@@ -231,7 +231,36 @@ public class TodoSQLiteManager {
     }
 
     public JSONArray sortTodos(String criteria, String direction) {
-        String sql = "SELECT * FROM todos ORDER BY " + criteria + " " + direction;
+        String orderByColumn;
+
+        // 映射前端排序依据到数据库列名
+        switch (criteria) {
+            case "importance":
+                orderByColumn = "importance";
+                break;
+            case "dueDate":
+                orderByColumn = "dueDate";
+                break;
+            case "completed":
+                orderByColumn = "completed";
+                break;
+            case "alphabetical":
+                orderByColumn = "title";
+                break;
+            default:
+                orderByColumn = "id"; // 默认排序
+        }
+
+        String orderDirection = "ASC";
+        if ("desc".equalsIgnoreCase(direction)) {
+            orderDirection = "DESC";
+        }
+
+        // 更新 SQL 查询，确保包含必要的 JOIN 操作
+        String sql = "SELECT todos.*, lists.name AS list_name FROM todos " +
+                "LEFT JOIN lists ON todos.list_id = lists.id " +
+                "ORDER BY " + orderByColumn + " " + orderDirection;
+
         JSONArray sortedTodosJson = new JSONArray();
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
@@ -244,6 +273,7 @@ public class TodoSQLiteManager {
         }
         return sortedTodosJson;
     }
+
 
     public JSONArray searchTodos(String query) {
         String sql = "SELECT todos.*, lists.name AS list_name FROM todos " +
