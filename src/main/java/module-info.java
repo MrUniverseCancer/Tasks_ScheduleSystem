@@ -5,4 +5,5 @@ module JCEFdemo {
     requires org.json;
     requires org.xerial.sqlitejdbc;
     requires java.desktop;
+    requires java.xml.crypto;
 }
