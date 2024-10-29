@@ -28,8 +28,7 @@ public class DataItem {
             this.name = resultSet.getString("title");
             this.list_id = resultSet.getInt("list_id");
             this.isCompleted = resultSet.getBoolean("completed");
-            this.dueDate = getLeftDays(resultSet.getString("due_date"));
-
+            this.dueDate = getLeftDays(resultSet.getString("dueDate"));
             this.importance = resultSet.getInt("importance");
         } catch (Exception e) {
             e.printStackTrace();

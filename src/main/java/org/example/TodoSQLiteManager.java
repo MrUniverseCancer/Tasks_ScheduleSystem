@@ -48,14 +48,68 @@ public class TodoSQLiteManager {
                 "icon TEXT," +
                 "type INTEGER DEFAULT 0)";
 
+        String ordersSql = "CREATE TABLE IF NOT EXISTS orders (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "list_id INTEGER," +
+                "todo_id INTEGER," +
+                "FOREIGN KEY (list_id) REFERENCES lists(id)," +
+                "FOREIGN KEY (todo_id) REFERENCES todos(id))";
+
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(listsSql);
             stmt.execute(todosSql);
+            stmt.execute(ordersSql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    // 对orderSql进行add
+    public void addOrder(int list_id, int todo_id) {
+        String sql = "INSERT INTO orders (list_id, todo_id) VALUES (?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, list_id);
+            pstmt.setInt(2, todo_id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 对orderSql进行delete，删除全部
+    public void deleteOrder() {
+        String sql = "DELETE FROM orders";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 查询orders表的每一行，根据todo_id选项从todos表中得到对应的所有数据,使用resultSetToJson进行包装
+    public JSONArray getOrders() {
+        String sql = "SELECT * FROM orders";
+        JSONArray ordersJson = new JSONArray();
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                int todo_id = rs.getInt("todo_id");
+                // 将todo_id对应的数据加入到ordersJson中
+                ordersJson.put(getTodo(todo_id));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ordersJson;
+    }
+
+
+
+
 
     public JSONObject addList(JSONObject listJson) {
         String sql = "INSERT INTO lists (name, icon, type) VALUES (?, ?, ?)";
@@ -228,10 +282,10 @@ public class TodoSQLiteManager {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-             while (rs.next()) {
-                 DataItem dataItem = new DataItem(rs);
-                 result.add(dataItem);
-             }
+            while (rs.next()) {
+                DataItem dataItem = new DataItem(rs);
+                result.add(dataItem);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -55,6 +55,13 @@ public class JcefTodoBridge implements CefMessageRouterHandler {
                 case "searchTodos":
                     callback.success(todoManager.searchTodos(jsonRequest.getString("query")).toString());
                     return true;
+                case "getRankedTodos":
+                    callback.success(todoManager.getOrders().toString());
+                    return true;
+                case "setTodosRanked":
+                    callback.success(RankingList.addRankingList().toString());
+                    return true;
+
                 default:
                     callback.failure(0, "Unknown action");
                     return true;
