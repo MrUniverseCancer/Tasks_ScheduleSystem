@@ -147,24 +147,6 @@ export default function TodoApp() {
         }
     };
 
-    const toggleImportant = async (id: number) => {
-        try {
-            const taskToUpdate = tasks.find(task => task.id === id);
-            if (taskToUpdate) {
-                const updatedTask = await jcefBridge.updateTodo({
-                    ...taskToUpdate,
-                    importance: taskToUpdate.importance === 100 ? 0 : 100
-                });
-                setTasks(tasks.map(task => task.id === id ? updatedTask : task));
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                setError('Failed to update task: ' + err.message);
-            } else {
-                setError('Failed to update task: An unknown error occurred');
-            }
-        }
-    };
 
     const handleSortChange = async (criteria: SortOption['value']) => {
         try {
@@ -555,7 +537,6 @@ export default function TodoApp() {
                                 currentList={currentList}
                                 onAddTask={handleAddTask}
                                 onToggleComplete={toggleComplete}
-                                onToggleImportant={toggleImportant}
                                 onSortChange={handleSortChange}
                                 sortState={sortState}
                                 lists={lists as jcefBridge.List[]}

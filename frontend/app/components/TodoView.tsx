@@ -7,7 +7,6 @@ interface TodoViewProps {
     currentList: string;
     onAddTask: (task: Omit<JcefTodo, 'id'>) => void;
     onToggleComplete: (id: number) => void;
-    onToggleImportant: (id: number) => void;
     onSortChange: (criteria: SortOption['value']) => void;
     sortState: SortState;
     lists: JcefList[]; // Add this line

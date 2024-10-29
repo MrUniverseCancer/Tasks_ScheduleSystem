@@ -28,8 +28,9 @@ declare global {
 
 const callBridge = async <T>(action: string, params: Record<string, unknown> = {}): Promise<T> => {
     return new Promise((resolve, reject) => {
+        const requestObj = {...params, action};  // 确保 action 最后设定
         window.cefQuery({
-            request: JSON.stringify({action, ...params}),
+            request: JSON.stringify(requestObj),
             onSuccess: (response: string) => resolve(JSON.parse(response) as T),
             onFailure: (_error_code: number, error_message: string) => reject(new Error(error_message))
         });
