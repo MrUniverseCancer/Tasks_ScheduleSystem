@@ -1,24 +1,27 @@
+// TodoApp.tsx
+
 'use client';
 
-import React, {useEffect, useState} from 'react';
-import {Check, Edit, Menu, Plus, Search, Settings, Trash, X} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Check, Edit, Menu, Plus, Search, Settings, Trash, X } from 'lucide-react';
 import SettingsPage from './SettingsPage';
 import TodoView from './TodoView';
 import QuadrantsUI from './Quadrants';
 import SearchBox from './SearchBox';
 import SearchResultsPage from './SearchResultsPage';
 import * as jcefBridge from './jcefBridge';
-import {Todo as JcefTodo} from './jcefBridge';
-
+import { Todo as JcefTodo } from './jcefBridge';
 
 interface ViewState {
     currentView: 'todo' | 'settings' | 'quadrants' | 'searchResults';
     previousList: string;
 }
 
-type List = Omit<jcefBridge.List, 'icon'> & {
+interface List extends Omit<jcefBridge.List, 'icon'> {
     icon: string | JSX.Element;
-};
+    type: number; // 0: Regular, 2: Sorting, 3: History
+    isDefault?: boolean;
+}
 
 interface SortOption {
     label: string;
@@ -61,15 +64,40 @@ export default function TodoApp() {
     useEffect(() => {
         const selectedList = lists.find(list => list.name === currentList);
         if (selectedList) {
-            setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+            if (selectedList.type === 3) { // History List
+                setTasks(allTasks.filter(task => task.completed));
+            } else if (selectedList.type === 2) { // Sorted List
+                setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+            } else { // Regular List
+                setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+            }
+        } else {
+            setTasks(allTasks);
         }
-    }, [currentList, allTasks]);
+    }, [currentList, allTasks, lists]);
 
 
     const loadLists = async () => {
         try {
             const loadedLists = await jcefBridge.getAllLists();
-            setLists(loadedLists);
+
+            // Define the History List
+            const historyList: List = {
+                id: -1, // Unique identifier for History
+                name: '历史', // 'History' in Chinese
+                icon: '🕒', // Example icon
+                type: 3, // Type for History List
+                isDefault: true
+            };
+
+            // Separate sorted lists (type=2)
+            const sortedLists = loadedLists.filter((list) => list.type === 2);
+
+            // Separate regular lists (type=0)
+            const regularLists = loadedLists.filter((list) => list.type === 0);
+
+            // Combine lists: History first, then sorted lists (if any), then regular lists
+            setLists([historyList, ...sortedLists, ...regularLists]);
         } catch (err) {
             if (err instanceof Error) {
                 setError('Failed to load lists: ' + err.message);
@@ -86,7 +114,13 @@ export default function TodoApp() {
             setAllTasks(loadedTasks);
             const selectedList = lists.find(list => list.name === currentList);
             if (selectedList) {
-                setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                if (selectedList.type === 3) { // History List
+                    setTasks(loadedTasks.filter(task => task.completed));
+                } else if (selectedList.type === 2) { // Sorted List
+                    setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                } else { // Regular List
+                    setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                }
             } else {
                 setTasks(loadedTasks);
             }
@@ -108,13 +142,18 @@ export default function TodoApp() {
             if (!currentListId) throw new Error('Current list not found');
 
             const addedTask = await jcefBridge.addTodo({
-                ...newTask,
-                list_id: currentListId,
-                list: currentList
+                title: newTask.title,
+                completed: false,
+                dueDate: newTask.dueDate,
+                importance: newTask.importance,
+                list: currentList,
+                list_id: currentListId
             });
             setAllTasks([...allTasks, addedTask]);
-            if (addedTask.list === currentList) {
-                setTasks([...tasks, addedTask]);
+            if (addedTask.list === currentList || currentList === '历史') { // Support auto-display for History List
+                setTasks(prevTasks => currentList === '历史'
+                    ? [...prevTasks, addedTask]
+                    : [...tasks, addedTask]);
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -134,8 +173,16 @@ export default function TodoApp() {
                     completed: !taskToUpdate.completed
                 });
                 setAllTasks(allTasks.map(task => task.id === id ? updatedTask : task));
-                if (updatedTask.list === currentList) {
-                    setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                if (updatedTask.list === currentList || currentList === '历史') { // Support auto-display for History List
+                    if (currentList === '历史') {
+                        if (updatedTask.completed) {
+                            setTasks(prevTasks => [...prevTasks, updatedTask]);
+                        } else {
+                            setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+                        }
+                    } else {
+                        setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                    }
                 }
             }
         } catch (err) {
@@ -155,10 +202,16 @@ export default function TodoApp() {
             setAllTasks(sortedAllTasks);
             setSortState({ criteria, direction: newDirection });
 
-            // 更新当前显示的任务列表
+            // Update the currently displayed task list
             const selectedList = lists.find(list => list.name === currentList);
             if (selectedList) {
-                setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+                if (selectedList.type === 3) { // History List
+                    setTasks(sortedAllTasks.filter(task => task.completed));
+                } else if (selectedList.type === 2) { // Sorted List
+                    setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+                } else { // Regular List
+                    setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+                }
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -179,7 +232,7 @@ export default function TodoApp() {
                 const newList = await jcefBridge.addList({
                     name: newListName.trim(),
                     icon: '•',
-                    type: 0 // 默认为0
+                    type: 0 // Default to type=0
                 });
                 setLists([...lists, newList]);
                 setNewListName('');
@@ -224,9 +277,10 @@ export default function TodoApp() {
 
         try {
             await jcefBridge.deleteList(listId);
-            await Promise.all(tasks.filter(task => task.list_id === listId).map(task => jcefBridge.deleteTodo(task.id)));
+            await Promise.all(allTasks.filter(task => task.list_id === listId).map(task => jcefBridge.deleteTodo(task.id)));
             setLists(lists.filter(list => list.id !== listId));
             setTasks(tasks.filter(task => task.list_id !== listId));
+            setAllTasks(allTasks.filter(task => task.list_id !== listId));
 
             if (currentList === listToDelete.name) {
                 setCurrentList('我的一天');
@@ -238,7 +292,7 @@ export default function TodoApp() {
 
 
     const handleEditList = (list: List) => {
-        if (list.isDefault) return;
+        if (list.isDefault || list.type !== 0) return;
         setEditingListId(list.id);
         setEditListName(list.name);
     }
@@ -254,9 +308,12 @@ export default function TodoApp() {
         setSidebarOpen(!sidebarOpen)
     }
 
-    const getListCount = (listName: string): number => {
-        return allTasks.filter(task => task.list === listName).length;
-    }
+    const getListCount = (list: List): number => {
+        if (list.type === 3) { // History List
+            return allTasks.filter(task => task.completed).length;
+        }
+        return allTasks.filter(task => task.list_id === list.id).length;
+    };
 
 
     const handleSettingsClick = () => {
@@ -295,22 +352,19 @@ export default function TodoApp() {
         setHasUnsavedSettings(false);
     };
 
-    const handleListClick = (listName: string) => {
-        if (viewState.currentView === 'settings' && hasUnsavedSettings) {
-            if (window.confirm('You have unsaved settings. Do you want to save before switching to the todo view?')) {
-                handleSettingsSave();
-            } else {
-                handleSettingsCancel();
-            }
-        }
-        setCurrentList(listName);
+    const handleListClick = (list: List) => {
+        setCurrentList(list.name);
         setViewState(prevState => ({
             ...prevState,
             currentView: 'todo'
         }));
-        const selectedList = lists.find(list => list.name === listName);
-        if (selectedList) {
-            setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+
+        if (list.type === 3) { // History List
+            setTasks(allTasks.filter(task => task.completed));
+        } else if (list.type === 2) { // Sorted List
+            setTasks(allTasks.filter(task => task.list_id === list.id));
+        } else { // Regular List
+            setTasks(allTasks.filter(task => task.list_id === list.id));
         }
     };
 
@@ -383,21 +437,22 @@ export default function TodoApp() {
                                     ) : (
                                         <div
                                             className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 
-                                    ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
-                                                ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
-                                                : ''}`}
+                    ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
+                                                    ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
+                                                    : ''}`}
                                         >
                                             <div
                                                 className="flex items-center flex-grow cursor-pointer"
-                                                onClick={() => handleListClick(list.name)}
+                                                onClick={() => handleListClick(list)}
                                             >
-                                            <span className="mr-2 flex-shrink-0">
-                                                {list.icon}
-                                            </span>
+                                                <span className="mr-2 flex-shrink-0">
+                                                    {list.icon}
+                                                </span>
                                                 <span className="flex-grow">{list.name}</span>
                                             </div>
                                             <div className="flex items-center">
-                                                {!list.isDefault && (
+                                                {/* Show Edit/Delete only for regular lists (type=0) and non-default */}
+                                                {list.type === 0 && !list.isDefault && (
                                                     <div className="flex items-center mr-2">
                                                         <button
                                                             onClick={() => handleEditList(list)}
@@ -414,8 +469,8 @@ export default function TodoApp() {
                                                     </div>
                                                 )}
                                                 <span className="ml-auto">
-                                                {getListCount(list.name)}
-                                            </span>
+                                                    {getListCount(list)}
+                                                </span>
                                             </div>
                                         </div>
                                     )}
@@ -488,7 +543,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'quadrants'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
                             <div className={`grid grid-cols-2 gap-0.5`}>
                                 <div className="w-2 h-2 bg-current rounded-sm"></div>
@@ -502,7 +557,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'settings'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
                             <Settings size={20} />
                         </button>
@@ -511,7 +566,7 @@ export default function TodoApp() {
                             className={`mr-4 p-1 rounded-t-lg transition-all ${viewState.currentView === 'searchResults'
                                 ? 'bg-white -mb-1 px-3 py-2 text-blue-600'
                                 : 'hover:bg-blue-700 text-white'
-                            }`}
+                                }`}
                         >
                             <Search size={20} />
                         </button>
@@ -533,7 +588,7 @@ export default function TodoApp() {
                     <>
                         {viewState.currentView === 'todo' ? (
                             <TodoView
-                                tasks={tasks.filter((task) => task.list === currentList)}
+                                tasks={tasks} // Ensure this reflects the current list
                                 currentList={currentList}
                                 onAddTask={handleAddTask}
                                 onToggleComplete={toggleComplete}

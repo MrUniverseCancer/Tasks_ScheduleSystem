@@ -390,12 +390,18 @@ public class TodoSQLiteManager {
     }
 
     public void populateExampleData() {
-        String[] defaultLists = {"我的一天", "计划内", "已分配给我", "任务"};
+        String[] defaultLists = {"我的一天", "任务"};
         for (String listName : defaultLists) {
             JSONObject list = new JSONObject();
             list.put("name", listName);
             list.put("icon", "•");
             addList(list);
         }
+
+        JSONObject sortedList = new JSONObject();
+        sortedList.put("name", "计划内");
+        sortedList.put("icon", "🔢");
+        sortedList.put("type", 2);
+        addList(sortedList);
     }
 }

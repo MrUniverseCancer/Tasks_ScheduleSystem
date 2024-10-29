@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {ChevronDown, RotateCcw} from 'lucide-react';
-import {List as JcefList, Todo as JcefTodo} from './jcefBridge';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown, RotateCcw } from 'lucide-react';
+import { List as JcefList, Todo as JcefTodo } from './jcefBridge';
 
 interface TodoViewProps {
     tasks: JcefTodo[];
@@ -9,9 +9,8 @@ interface TodoViewProps {
     onToggleComplete: (id: number) => void;
     onSortChange: (criteria: SortOption['value']) => void;
     sortState: SortState;
-    lists: JcefList[]; // Add this line
+    lists: JcefList[];
 }
-
 
 interface SortOption {
     label: string;
@@ -24,14 +23,14 @@ interface SortState {
 }
 
 const TodoView: React.FC<TodoViewProps> = ({
-                                               tasks,
-                                               currentList,
-                                               onAddTask,
-                                               onToggleComplete,
-                                               onSortChange,
-                                               sortState,
-                                               lists // Add this line
-                                           }) => {
+    tasks,
+    currentList,
+    onAddTask,
+    onToggleComplete,
+    onSortChange,
+    sortState,
+    lists
+}) => {
     const [newTask, setNewTask] = useState({
         title: '',
         dueDate: '',
@@ -39,15 +38,17 @@ const TodoView: React.FC<TodoViewProps> = ({
     });
 
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-    const [sortMenuPosition, setSortMenuPosition] = useState({top: 0, left: 0});
+    const [sortMenuPosition, setSortMenuPosition] = useState({ top: 0, left: 0 });
 
     const sortButtonRef = useRef<HTMLButtonElement>(null);
     const sortMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node) &&
-                sortButtonRef.current && !sortButtonRef.current.contains(event.target as Node)) {
+            if (
+                sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node) &&
+                sortButtonRef.current && !sortButtonRef.current.contains(event.target as Node)
+            ) {
                 setIsSortMenuOpen(false);
             }
         };
@@ -61,10 +62,9 @@ const TodoView: React.FC<TodoViewProps> = ({
     const handleSortClick = (event: React.MouseEvent) => {
         event.stopPropagation();
         const rect = event.currentTarget.getBoundingClientRect();
-        setSortMenuPosition({top: rect.bottom, left: rect.left});
+        setSortMenuPosition({ top: rect.bottom, left: rect.left });
         setIsSortMenuOpen(!isSortMenuOpen);
     };
-
 
     const addTask = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,7 +81,7 @@ const TodoView: React.FC<TodoViewProps> = ({
                     list: currentList,
                     list_id: currentListId
                 });
-                setNewTask({title: '', dueDate: '', importance: 50});
+                setNewTask({ title: '', dueDate: '', importance: 50 });
             } catch (err) {
                 console.error('Failed to add task:', err);
             }
@@ -122,35 +122,39 @@ const TodoView: React.FC<TodoViewProps> = ({
             <div className="bg-white p-4 flex items-center justify-between border-b">
                 <h3 className="text-xl font-semibold">{currentList}</h3>
                 <div className="flex items-center">
-                    <button className="p-2"><RotateCcw size={20}/></button>
+                    <button className="p-2"><RotateCcw size={20} /></button>
                     <button
                         ref={sortButtonRef}
                         className="p-2 flex items-center"
                         onClick={handleSortClick}
+                        disabled={currentList === '历史'} // Disable sorting for History List
                     >
-                        排序 ({getSortLabel()}) <ChevronDown size={16} className="ml-1"/>
+                        排序 ({getSortLabel()}) <ChevronDown size={16} className="ml-1" />
                     </button>
                     {isSortMenuOpen && (
                         <div
                             ref={sortMenuRef}
                             className="absolute bg-white border rounded shadow-lg"
-                            style={{top: `${sortMenuPosition.top}px`, left: `${sortMenuPosition.left}px`}}
+                            style={{ top: `${sortMenuPosition.top}px`, left: `${sortMenuPosition.left}px` }}
                         >
                             <button
                                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                                 onClick={(e) => handleSortOptionSelect('importance', e)}
+                                disabled={currentList === '历史'} // Disable sorting for History List
                             >
                                 按重要性 {sortState.criteria === 'importance' && (sortState.direction === 'asc' ? '↑' : '↓')}
                             </button>
                             <button
                                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                                 onClick={(e) => handleSortOptionSelect('dueDate', e)}
+                                disabled={currentList === '历史'} // Disable sorting for History List
                             >
                                 按到期日 {sortState.criteria === 'dueDate' && (sortState.direction === 'asc' ? '↑' : '↓')}
                             </button>
                             <button
                                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                                 onClick={(e) => handleSortOptionSelect('alphabetical', e)}
+                                disabled={currentList === '历史'} // Disable sorting for History List
                             >
                                 按字母顺序 {sortState.criteria === 'alphabetical' && (sortState.direction === 'asc' ? '↑' : '↓')}
                             </button>
@@ -178,47 +182,49 @@ const TodoView: React.FC<TodoViewProps> = ({
                     </div>
                 ))}
             </div>
-            <form onSubmit={addTask} className="bg-white p-4 border-t">
-                <div className="flex flex-col space-y-4">
-                    <input
-                        type="text"
-                        value={newTask.title}
-                        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                        placeholder="任务名称"
-                        className="p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                    />
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <input
-                                type="date"
-                                value={newTask.dueDate}
-                                onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
-                                className="p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                            />
-                            <div className="flex items-center">
-                                <span className="mr-2">重要性 (0-100):</span>
+            {currentList !== '历史' && ( // Conditionally render the add task form
+                <form onSubmit={addTask} className="bg-white p-4 border-t">
+                    <div className="flex flex-col space-y-4">
+                        <input
+                            type="text"
+                            value={newTask.title}
+                            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                            placeholder="任务名称"
+                            className="p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                        />
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
                                 <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={newTask.importance}
-                                    onChange={(e) => setNewTask({
-                                        ...newTask,
-                                        importance: Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
-                                    })}
-                                    className="w-20 p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                                    type="date"
+                                    value={newTask.dueDate}
+                                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                    className="p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
                                 />
+                                <div className="flex items-center">
+                                    <span className="mr-2">重要性 (0-100):</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={newTask.importance}
+                                        onChange={(e) => setNewTask({
+                                            ...newTask,
+                                            importance: Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
+                                        })}
+                                        className="w-20 p-2 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                                    />
+                                </div>
                             </div>
+                            <button
+                                type="submit"
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none"
+                            >
+                                新建任务
+                            </button>
                         </div>
-                        <button
-                            type="submit"
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none"
-                        >
-                            新建任务
-                        </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            )}
         </>
     );
 
