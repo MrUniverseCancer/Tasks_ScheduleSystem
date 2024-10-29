@@ -118,15 +118,15 @@ export default function QuadrantsUI() {
         <div className="w-full h-screen bg-gray-100 p-8">
             {/* Rest of the component remains the same */}
             <div className="w-full h-full bg-white rounded-lg shadow-lg relative">
-                <div className="absolute top-0 left-0 right-4 border-t-4 border-gray-800"></div>
-                <div className="absolute top-0 bottom-0 left-0 border-l-4 border-gray-800"></div>
+                <div className="absolute top-0 left-0 right-0 border-t-4 border-gray-400"></div>
+                <div className="absolute top-0 bottom-0 left-0 border-l-4 border-gray-400"></div>
                 <div className="absolute top-1 left-1 w-1/2 h-1/2 bg-red-100"></div>
                 <div className="absolute top-1 right-0 w-1/2 h-1/2 bg-yellow-100"></div>
                 <div className="absolute bottom-0 left-1 w-1/2 h-1/2 bg-blue-100"></div>
                 <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-green-100"></div>
                 {/* 箭头 */}
-                <div className="absolute -top-2 right-2 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-800 transform -rotate-45" style={{ marginTop: '5px', marginRight: '8px' }}></div>
-                <div className="absolute -bottom-0 -left-0.5 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-800 transform rotate-45" style={{ marginTop: '5px', marginRight: 'px' }}></div>
+                <div className="absolute -top-2 -right-2 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-500 transform -rotate-45" style={{ marginTop: '5px', marginRight: '8px' }}></div>
+                <div className="absolute -bottom-0 -left-0.5 w-0 h-0 border-l-8 border-l-transparent border-b-8 border-b-gray-500 transform rotate-45" style={{ marginTop: '5px', marginRight: 'px' }}></div>
 
                 <div className="absolute top-0 bottom-0 left-0 right-0">
                     <span className="absolute -left-5 -bottom-10  px-2 transform -translate-y-1/2">重要性</span>
