@@ -95,6 +95,22 @@ public class TodoSQLiteManager {
         return listsJson;
     }
 
+    public ArrayList<ListsItem> getAllLists(int i) {
+        ArrayList<ListsItem> result = new ArrayList<>();
+        String sql = "SELECT * FROM lists";
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                ListsItem listsItem = new ListsItem(rs);
+                result.add(listsItem);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public JSONObject updateList(JSONObject listJson) {
         String sql = "UPDATE lists SET name = ?, icon = ?, type = ? WHERE id = ?";
         try (Connection conn = getConnection();
