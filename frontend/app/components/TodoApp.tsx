@@ -67,12 +67,12 @@ export default function TodoApp() {
             if (selectedList.type === 3) { // History List
                 setTasks(allTasks.filter(task => task.completed));
             } else if (selectedList.type === 2) { // Sorted List
-                setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
             } else { // Regular List
-                setTasks(allTasks.filter(task => task.list_id === selectedList.id));
+                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
             }
         } else {
-            setTasks(allTasks);
+            setTasks(allTasks.filter(task => !task.completed));
         }
     }, [currentList, allTasks, lists]);
 
@@ -84,8 +84,8 @@ export default function TodoApp() {
             // Define the History List
             const historyList: List = {
                 id: -1, // Unique identifier for History
-                name: '历史', // 'History' in Chinese
-                icon: '🕒', // Example icon
+                name: '历史',
+                icon: '🕒',
                 type: 3, // Type for History List
                 isDefault: true
             };
@@ -96,8 +96,8 @@ export default function TodoApp() {
             // Separate regular lists (type=0)
             const regularLists = loadedLists.filter((list) => list.type === 0);
 
-            // Combine lists: History first, then sorted lists (if any), then regular lists
-            setLists([historyList, ...sortedLists, ...regularLists]);
+            // Combine lists
+            setLists([...sortedLists, historyList, ...regularLists]);
         } catch (err) {
             if (err instanceof Error) {
                 setError('Failed to load lists: ' + err.message);
