@@ -3,7 +3,9 @@ package org.example;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
+import java.util.ArrayList;
 
 
 public class TodoSQLiteManager {
@@ -197,6 +199,23 @@ public class TodoSQLiteManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList<DataItem> getAllTodos(int i) {
+        // 为了在Java模块中给任务做排序
+        ArrayList<DataItem> result = new ArrayList<>();
+        String sql = "SELECT todos.*, lists.name AS list_name FROM todos LEFT JOIN lists ON todos.list_id = lists.id";
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+             while (rs.next()) {
+                 DataItem dataItem = new DataItem(rs);
+                 result.add(dataItem);
+             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public JSONArray getAllTodos() {
