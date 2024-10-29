@@ -196,7 +196,8 @@ export default function TodoApp() {
             try {
                 const newList = await jcefBridge.addList({
                     name: newListName.trim(),
-                    icon: '•'
+                    icon: '•',
+                    type: 0 // 默认为0
                 });
                 setLists([...lists, newList]);
                 setNewListName('');
@@ -222,7 +223,8 @@ export default function TodoApp() {
                 const updatedList = await jcefBridge.updateList({
                     id: editingListId,
                     name: editListName.trim(),
-                    icon: typeof listToUpdate.icon === 'string' ? listToUpdate.icon : '•'
+                    icon: typeof listToUpdate.icon === 'string' ? listToUpdate.icon : '•',
+                    type: listToUpdate.type
                 });
                 setLists(lists.map(list => list.id === editingListId ? { ...updatedList, icon: list.icon } : list));
                 setEditingListId(null);

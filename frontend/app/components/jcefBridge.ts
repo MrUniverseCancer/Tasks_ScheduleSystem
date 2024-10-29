@@ -12,6 +12,7 @@ export interface List {
     id: number;
     name: string;
     icon: string;
+    type: number;
     isDefault?: boolean;
 }
 

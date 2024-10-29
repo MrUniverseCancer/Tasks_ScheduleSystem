@@ -43,7 +43,8 @@ public class TodoSQLiteManager {
         String listsSql = "CREATE TABLE IF NOT EXISTS lists (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "name TEXT NOT NULL UNIQUE," +
-                "icon TEXT)";
+                "icon TEXT," +
+                "type INTEGER DEFAULT 0)";
 
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
@@ -55,11 +56,12 @@ public class TodoSQLiteManager {
     }
 
     public JSONObject addList(JSONObject listJson) {
-        String sql = "INSERT INTO lists (name, icon) VALUES (?, ?)";
+        String sql = "INSERT INTO lists (name, icon, type) VALUES (?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, listJson.getString("name"));
             pstmt.setString(2, listJson.getString("icon"));
+            pstmt.setInt(3, listJson.optInt("type", 0)); // 默认为0
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -92,12 +94,13 @@ public class TodoSQLiteManager {
     }
 
     public JSONObject updateList(JSONObject listJson) {
-        String sql = "UPDATE lists SET name = ?, icon = ? WHERE id = ?";
+        String sql = "UPDATE lists SET name = ?, icon = ?, type = ? WHERE id = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, listJson.getString("name"));
             pstmt.setString(2, listJson.getString("icon"));
-            pstmt.setInt(3, listJson.getInt("id"));
+            pstmt.setInt(3, listJson.optInt("type", 0)); // 默认为0
+            pstmt.setInt(4, listJson.getInt("id"));
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -125,6 +128,7 @@ public class TodoSQLiteManager {
         listJson.put("id", rs.getInt("id"));
         listJson.put("name", rs.getString("name"));
         listJson.put("icon", rs.getString("icon"));
+        listJson.put("type", rs.getInt("type"));
         return listJson;
     }
 
