@@ -82,4 +82,23 @@ npm run dev
 你可以在运行`ReactAppLoader`后弹出的窗口中看到正常运行的前端，在这里面的前端可以和后端交互。
 
 # 构建相关
-待完成
+
+## 关于访问资源路径的说明
+
+应将`npm run build`得到的`out`放在`resources`目录下，然后在`httpserver`中通过
+
+```
+getClass().getResourceAsStream(“out/index.html”);
+```
+
+访问整个静态页面的入口。
+
+### Q1：关于getClassLoader()的操作失效的问题
+
+`getClass().getClassLoader().getResourceAsStream("out/index.html")`会找不到该文件。
+原因可参考ClassLoader 与 Class 的差异（只阐述了不使用`getClassLoader()`并添加“/”为什么行，但没说明为什么使用
+`getClassLoader()`的时候找不到）：
+
+- ClassLoader 的 getResourceAsStream(String name) 方法会从类路径的根目录开始查找资源，路径不应以 / 开头。
+- Class 的 getResourceAsStream(String name) 方法有不同的路径解析方式，可能需要以 / 开头， 对于 Class.getResourceAsStream("
+  /out/index.html")，路径应该以 / 开头，表示从类路径的根目录开始查找。

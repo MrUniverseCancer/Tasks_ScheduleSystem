@@ -42,3 +42,4 @@ build/
 /frontend/out/
 /frontend/.next/
 /todos.db
+/src/main/resources/
