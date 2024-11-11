@@ -1,13 +1,27 @@
-'use client'
+// MobileTodoApp.tsx
 
-import { useState, useEffect, useRef } from 'react';
-import { Menu, Search, Settings, X, Edit, Plus, RotateCcw, ChevronDown, Trash, Check } from 'lucide-react';
-import TodoView from './TodoView';
-import SearchResultsPage from './SearchResultsPage';
+'use client';
+
+import React, { useEffect, useState, useRef } from 'react';
+import { Check, Edit, Menu, Plus, Search, Settings, Trash, X } from 'lucide-react';
 import SettingsPage from './SettingsPage';
+import TodoView from './TodoView';
 import QuadrantsUI from './Quadrants';
+import SearchBox from './SearchBox';
+import SearchResultsPage from './SearchResultsPage';
 import * as jcefBridge from './jcefBridge';
-import { Todo as JcefTodo, List as JcefList } from './jcefBridge';
+import { Todo as JcefTodo } from './jcefBridge';
+
+interface ViewState {
+    currentView: 'todo' | 'settings' | 'quadrants' | 'searchResults';
+    previousList: string;
+}
+
+interface List extends Omit<jcefBridge.List, 'icon'> {
+    icon: string | JSX.Element;
+    type: number; // 0: Regular, 2: Sorting, 3: History
+    isDefault?: boolean;
+}
 
 interface SortOption {
     label: string;
@@ -19,13 +33,12 @@ interface SortState {
     direction: 'asc' | 'desc';
 }
 
-export default function MobileTodoApp() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('home');
+const MobileTodoApp: React.FC = () => {
+    const [allTasks, setAllTasks] = useState<JcefTodo[]>([]);
     const [tasks, setTasks] = useState<JcefTodo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [lists, setLists] = useState<JcefList[]>([]);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [currentList, setCurrentList] = useState('我的一天');
     const [isCreatingList, setIsCreatingList] = useState(false);
     const [newListName, setNewListName] = useState('');
@@ -33,21 +46,65 @@ export default function MobileTodoApp() {
     const [editListName, setEditListName] = useState('');
     const [sortState, setSortState] = useState<SortState>({
         criteria: 'importance',
-        direction: 'desc',
+        direction: 'desc'
+    });
+    const [viewState, setViewState] = useState<ViewState>({
+        currentView: 'quadrants',
+        previousList: '我的一天'
     });
     const [searchQuery, setSearchQuery] = useState('');
+    const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
+    const [lists, setLists] = useState<List[]>([]);
+
+    const sidebarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         loadLists();
         loadTasks();
     }, []);
 
+    useEffect(() => {
+        const selectedList = lists.find(list => list.name === currentList);
+        if (selectedList) {
+            if (selectedList.type === 3) { // History List
+                setTasks(allTasks.filter(task => task.completed));
+            } else if (selectedList.type === 2) { // Sorted List
+                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
+            } else { // Regular List
+                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
+            }
+        } else {
+            setTasks(allTasks.filter(task => !task.completed));
+        }
+    }, [currentList, allTasks, lists]);
+
     const loadLists = async () => {
         try {
             const loadedLists = await jcefBridge.getAllLists();
-            setLists(loadedLists);
+
+            // Define the History List
+            const historyList: List = {
+                id: -1, // Unique identifier for History
+                name: '历史',
+                icon: '🕒',
+                type: 3, // Type for History List
+                isDefault: true
+            };
+
+            // Separate sorted lists (type=2)
+            const sortedLists = loadedLists.filter((list) => list.type === 2);
+
+            // Separate regular lists (type=0)
+            const regularLists = loadedLists.filter((list) => list.type === 0);
+
+            // Combine lists
+            setLists([...sortedLists, historyList, ...regularLists]);
         } catch (err) {
-            setError('Failed to load lists: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
+            if (err instanceof Error) {
+                setError('Failed to load lists: ' + err.message);
+            } else {
+                setError('Failed to load lists: An unknown error occurred');
+            }
         }
     };
 
@@ -55,10 +112,26 @@ export default function MobileTodoApp() {
         try {
             setLoading(true);
             const loadedTasks = await jcefBridge.getAllTodos();
-            setTasks(loadedTasks);
+            setAllTasks(loadedTasks);
+            const selectedList = lists.find(list => list.name === currentList);
+            if (selectedList) {
+                if (selectedList.type === 3) { // History List
+                    setTasks(loadedTasks.filter(task => task.completed));
+                } else if (selectedList.type === 2) { // Sorted List
+                    setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                } else { // Regular List
+                    setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                }
+            } else {
+                setTasks(loadedTasks);
+            }
             setError(null);
         } catch (err) {
-            setError('Failed to load tasks: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
+            if (err instanceof Error) {
+                setError('Failed to load tasks: ' + err.message);
+            } else {
+                setError('Failed to load tasks: An unknown error occurred');
+            }
         } finally {
             setLoading(false);
         }
@@ -66,76 +139,100 @@ export default function MobileTodoApp() {
 
     const handleAddTask = async (newTask: Omit<JcefTodo, 'id'>) => {
         try {
-            const currentListId = lists.find((list) => list.name === currentList)?.id;
+            const currentListId = lists.find(list => list.name === currentList)?.id;
             if (!currentListId) throw new Error('Current list not found');
 
             const addedTask = await jcefBridge.addTodo({
-                ...newTask,
-                list_id: currentListId,
+                title: newTask.title,
+                completed: false,
+                dueDate: newTask.dueDate,
+                importance: newTask.importance,
                 list: currentList,
+                list_id: currentListId
             });
-            setTasks([...tasks, addedTask]);
+            setAllTasks([...allTasks, addedTask]);
+            if (addedTask.list === currentList || currentList === '历史') { // Support auto-display for History List
+                setTasks(prevTasks => currentList === '历史'
+                    ? [...prevTasks, addedTask]
+                    : [...tasks, addedTask]);
+            }
         } catch (err) {
-            setError('Failed to add task: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
+            if (err instanceof Error) {
+                setError('Failed to add task: ' + err.message);
+            } else {
+                setError('Failed to add task: An unknown error occurred');
+            }
         }
     };
 
     const toggleComplete = async (id: number) => {
         try {
-            const taskToUpdate = tasks.find((task) => task.id === id);
+            const taskToUpdate = allTasks.find(task => task.id === id);
             if (taskToUpdate) {
                 const updatedTask = await jcefBridge.updateTodo({
                     ...taskToUpdate,
-                    completed: !taskToUpdate.completed,
+                    completed: !taskToUpdate.completed
                 });
-                setTasks(tasks.map((task) => (task.id === id ? updatedTask : task)));
+                setAllTasks(allTasks.map(task => task.id === id ? updatedTask : task));
+                if (updatedTask.list === currentList || currentList === '历史') { // Support auto-display for History List
+                    if (currentList === '历史') {
+                        if (updatedTask.completed) {
+                            setTasks(prevTasks => [...prevTasks, updatedTask]);
+                        } else {
+                            setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+                        }
+                    } else {
+                        setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                    }
+                }
             }
         } catch (err) {
-            setError('Failed to update task: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
-        }
-    };
-
-    const toggleImportant = async (id: number) => {
-        try {
-            const taskToUpdate = tasks.find((task) => task.id === id);
-            if (taskToUpdate) {
-                const updatedTask = await jcefBridge.updateTodo({
-                    ...taskToUpdate,
-                    importance: taskToUpdate.importance === 100 ? 0 : 100,
-                });
-                setTasks(tasks.map((task) => (task.id === id ? updatedTask : task)));
+            if (err instanceof Error) {
+                setError('Failed to update task: ' + err.message);
+            } else {
+                setError('Failed to update task: An unknown error occurred');
             }
-        } catch (err) {
-            setError('Failed to update task: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
         }
     };
 
     const handleSortChange = async (criteria: SortOption['value']) => {
         try {
             const newDirection = sortState.criteria === criteria && sortState.direction === 'desc' ? 'asc' : 'desc';
-            const sortedTasks = await jcefBridge.sortTodos(criteria, newDirection);
-            setTasks(sortedTasks);
+            const sortedAllTasks = await jcefBridge.sortTodos(criteria, newDirection);
+            setAllTasks(sortedAllTasks);
             setSortState({ criteria, direction: newDirection });
-        } catch (err) {
-            setError('Failed to sort tasks: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
-        }
-    };
 
-    const handleListClick = (listName: string) => {
-        setCurrentList(listName);
-        setIsSidebarOpen(false);
+            // Update the currently displayed task list
+            const selectedList = lists.find(list => list.name === currentList);
+            if (selectedList) {
+                if (selectedList.type === 3) { // History List
+                    setTasks(sortedAllTasks.filter(task => task.completed));
+                } else if (selectedList.type === 2) { // Sorted List
+                    setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+                } else { // Regular List
+                    setTasks(sortedAllTasks.filter(task => task.list_id === selectedList.id));
+                }
+            }
+        } catch (err) {
+            if (err instanceof Error) {
+                setError('Failed to sort tasks: ' + err.message);
+            } else {
+                setError('Failed to sort tasks: An unknown error occurred');
+            }
+        }
     };
 
     const handleCreateList = async () => {
         if (newListName.trim()) {
-            if (lists.some((list) => list.name.toLowerCase() === newListName.trim().toLowerCase())) {
-                alert('该列表名称已存在，请选择其他名称。');
+            if (lists.some(list => list.name.toLowerCase() === newListName.trim().toLowerCase())) {
+                alert('A list with this name already exists. Please choose a different name.');
                 return;
             }
             try {
                 const newList = await jcefBridge.addList({
                     name: newListName.trim(),
                     icon: '•',
+                    type: 0 // Default to type=0
                 });
                 setLists([...lists, newList]);
                 setNewListName('');
@@ -147,30 +244,24 @@ export default function MobileTodoApp() {
         }
     };
 
-    const handleCancelCreate = () => {
-        setIsCreatingList(false);
-        setNewListName('');
-    };
-
-    const handleEditList = (list: JcefList) => {
-        if (list.isDefault) return;
-        setEditingListId(list.id);
-        setEditListName(list.name);
-    };
-
-    const handleUpdateList = async () => {
-        if (editListName.trim() && editingListId !== null) {
-            if (lists.some((list) => list.id !== editingListId && list.name.toLowerCase() === editListName.trim().toLowerCase())) {
-                alert('该列表名称已存在，请选择其他名称。');
+    const handleUpdateList = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editListName.trim() && editingListId) {
+            if (lists.some(list => list.id !== editingListId && list.name.toLowerCase() === editListName.trim().toLowerCase())) {
+                alert('A list with this name already exists. Please choose a different name.');
                 return;
             }
             try {
+                const listToUpdate = lists.find(l => l.id === editingListId);
+                if (!listToUpdate) throw new Error('List not found');
+
                 const updatedList = await jcefBridge.updateList({
                     id: editingListId,
                     name: editListName.trim(),
-                    icon: '•',
+                    icon: typeof listToUpdate.icon === 'string' ? listToUpdate.icon : '•',
+                    type: listToUpdate.type
                 });
-                setLists(lists.map((list) => (list.id === editingListId ? updatedList : list)));
+                setLists(lists.map(list => list.id === editingListId ? { ...updatedList, icon: list.icon } : list));
                 setEditingListId(null);
                 setEditListName('');
                 setCurrentList(updatedList.name);
@@ -181,15 +272,15 @@ export default function MobileTodoApp() {
     };
 
     const handleDeleteList = async (listId: number) => {
-        const listToDelete = lists.find((l) => l.id === listId);
+        const listToDelete = lists.find(l => l.id === listId);
         if (!listToDelete || listToDelete.isDefault) return;
 
         try {
             await jcefBridge.deleteList(listId);
-            // 删除该列表下的所有任务
-            await Promise.all(tasks.filter((task) => task.list_id === listId).map((task) => jcefBridge.deleteTodo(task.id)));
-            setLists(lists.filter((list) => list.id !== listId));
-            setTasks(tasks.filter((task) => task.list_id !== listId));
+            await Promise.all(allTasks.filter(task => task.list_id === listId).map(task => jcefBridge.deleteTodo(task.id)));
+            setLists(lists.filter(list => list.id !== listId));
+            setTasks(tasks.filter(task => task.list_id !== listId));
+            setAllTasks(allTasks.filter(task => task.list_id !== listId));
 
             if (currentList === listToDelete.name) {
                 setCurrentList('我的一天');
@@ -199,311 +290,364 @@ export default function MobileTodoApp() {
         }
     };
 
-    const getListCount = (listName: string): number => {
-        return tasks.filter((task) => task.list === listName).length;
+    const handleEditList = (list: List) => {
+        if (list.isDefault || list.type !== 0) return;
+        setEditingListId(list.id);
+        setEditListName(list.name);
+    }
+
+    const handleCancelCreate = () => {
+        setIsCreatingList(false)
+        setNewListName('')
+    }
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen)
+    }
+
+    const getListCount = (list: List): number => {
+        if (list.type === 3) { // History List
+            return allTasks.filter(task => task.completed).length;
+        }
+        return allTasks.filter(task => task.list_id === list.id).length;
     };
 
-    const sortButtonRef = useRef<HTMLButtonElement>(null);
-    const sortMenuRef = useRef<HTMLDivElement>(null);
-    const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-    const [sortMenuPosition, setSortMenuPosition] = useState({ top: 0, left: 0 });
-
-    const handleSortClick = (event: React.MouseEvent) => {
-        event.stopPropagation();
-        const rect = event.currentTarget.getBoundingClientRect();
-        setSortMenuPosition({ top: rect.bottom, left: rect.left });
-        setIsSortMenuOpen(!isSortMenuOpen);
+    const handleSettingsClick = () => {
+        setViewState(() => ({
+            currentView: 'settings',
+            previousList: currentList
+        }));
     };
 
+    const handleSettingsCancel = () => {
+        if (hasUnsavedSettings) {
+            if (window.confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+                setViewState(prevState => ({
+                    currentView: 'todo',
+                    previousList: prevState.previousList
+                }));
+                setCurrentList(viewState.previousList);
+                setHasUnsavedSettings(false);
+            }
+        } else {
+            setViewState(prevState => ({
+                currentView: 'todo',
+                previousList: prevState.previousList
+            }));
+            setCurrentList(viewState.previousList);
+        }
+    };
+
+    const handleSettingsSave = () => {
+        // Implement your save logic here
+        setViewState(prevState => ({
+            currentView: 'todo',
+            previousList: prevState.previousList
+        }));
+        setCurrentList(viewState.previousList);
+        setHasUnsavedSettings(false);
+    };
+
+    const handleListClick = (list: List) => {
+        setCurrentList(list.name);
+        setViewState(prevState => ({
+            ...prevState,
+            currentView: 'todo'
+        }));
+
+        if (list.type === 3) { // History List
+            setTasks(allTasks.filter(task => task.completed));
+        } else if (list.type === 2) { // Sorted List
+            setTasks(allTasks.filter(task => task.list_id === list.id));
+        } else { // Regular List
+            setTasks(allTasks.filter(task => task.list_id === list.id));
+        }
+    };
+
+    const handleSettingsChange = () => {
+        setHasUnsavedSettings(true);
+    };
+
+    const handleQuadrantsClick = () => {
+        setViewState(() => ({
+            currentView: 'quadrants',
+            previousList: currentList
+        }));
+    };
+
+    const handleSearchViewMore = () => {
+        setViewState((prevState) => ({
+            ...prevState,
+            currentView: 'searchResults',
+        }));
+    };
+
+    const handleSearchSubmit = (query: string) => {
+        setSearchQuery(query);
+        setViewState((prevState) => ({
+            ...prevState,
+            currentView: 'searchResults',
+        }));
+    };
+
+    const handleBackFromSearch = () => {
+        setViewState((prevState) => ({
+            ...prevState,
+            currentView: 'todo',
+        }));
+        setSearchQuery('');
+    };
+
+    // Handle click outside sidebar to close it
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                sortMenuRef.current &&
-                !sortMenuRef.current.contains(event.target as Node) &&
-                sortButtonRef.current &&
-                !sortButtonRef.current.contains(event.target as Node)
-            ) {
-                setIsSortMenuOpen(false);
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+                setSidebarOpen(false);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        if (sidebarOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
-
-    const handleSortOptionSelect = async (option: SortOption['value'], event: React.MouseEvent) => {
-        event.stopPropagation();
-        try {
-            await handleSortChange(option);
-        } catch (err) {
-            console.error('Failed to sort tasks:', err);
-        }
-        setIsSortMenuOpen(false);
-    };
-
-    const getSortLabel = () => {
-        const labels = {
-            importance: '重要性',
-            dueDate: '到期日',
-            alphabetical: '字母顺序',
-        };
-        return `${labels[sortState.criteria]} ${sortState.direction === 'asc' ? '↑' : '↓'}`;
-    };
+    }, [sidebarOpen]);
 
     return (
-        <div className="h-screen flex flex-col bg-gray-100">
-            {/* Header */}
-            <header className="bg-blue-600 text-white p-4 flex items-center justify-between">
-                <button onClick={() => setIsSidebarOpen(true)} className="text-white">
+        <div className="flex flex-col h-screen bg-gray-100">
+            {/* Header with Search and Menu Button */}
+            <header className="bg-white shadow p-2 flex items-center justify-between">
+                <button
+                    onClick={toggleSidebar}
+                    className="p-2 rounded-md hover:bg-gray-200"
+                >
                     <Menu size={24} />
                 </button>
-                <h1 className="text-xl font-bold">{currentList}</h1>
-                <div className="flex items-center">
-                    <button
-                        ref={sortButtonRef}
-                        className="p-1 flex items-center"
-                        onClick={handleSortClick}
-                    >
-                        <RotateCcw size={20} />
-                        <ChevronDown size={16} className="ml-1" />
-                    </button>
-                    {isSortMenuOpen && (
-                        <div
-                            ref={sortMenuRef}
-                            className="absolute bg-white border rounded shadow-lg"
-                            style={{ top: `${sortMenuPosition.top}px`, left: `${sortMenuPosition.left}px` }}
-                        >
-                            <button
-                                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                onClick={(e) => handleSortOptionSelect('importance', e)}
-                            >
-                                按重要性 {sortState.criteria === 'importance' && (sortState.direction === 'asc' ? '↑' : '↓')}
-                            </button>
-                            <button
-                                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                onClick={(e) => handleSortOptionSelect('dueDate', e)}
-                            >
-                                按到期日 {sortState.criteria === 'dueDate' && (sortState.direction === 'asc' ? '↑' : '↓')}
-                            </button>
-                            <button
-                                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                onClick={(e) => handleSortOptionSelect('alphabetical', e)}
-                            >
-                                按字母顺序 {sortState.criteria === 'alphabetical' && (sortState.direction === 'asc' ? '↑' : '↓')}
-                            </button>
-                        </div>
-                    )}
-                </div>
+                <SearchBox
+                    onSearch={handleSearchSubmit}
+                    onViewMore={handleSearchViewMore}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    isSearchResultsPage={viewState.currentView === 'searchResults'}
+                />
+                {/* Placeholder for alignment */}
+                <div className="w-8"></div>
             </header>
 
-            {/* Search Bar */}
-            <div className="bg-blue-600 pb-4 px-4">
-                <div className="bg-white rounded-full flex items-center px-4 py-2">
-                    <Search size={20} className="text-gray-500" />
-                    <input
-                        type="text"
-                        placeholder="搜索"
-                        className="ml-2 w-full outline-none text-sm"
-                        onFocus={() => setActiveTab('search')}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        value={searchQuery}
-                    />
+            {/* Sidebar Overlay */}
+            {sidebarOpen && (
+                <div className="fixed inset-0 z-20 flex">
+                    {/* Sidebar */}
+                    <div
+                        ref={sidebarRef}
+                        className="w-64 bg-white shadow-md p-4 overflow-y-auto transition-transform transform translate-x-0"
+                    >
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold">列表</h2>
+                            <button
+                                onClick={toggleSidebar}
+                                className="p-2 rounded-md hover:bg-gray-200"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <nav className="mb-4">
+                            {lists.map((list) => (
+                                <div key={list.id} className="relative group">
+                                    {editingListId === list.id ? (
+                                        <form onSubmit={handleUpdateList} className="px-2 py-1">
+                                            <div className="flex items-center bg-gray-100 rounded-lg p-2">
+                                                <input
+                                                    type="text"
+                                                    value={editListName}
+                                                    onChange={(e) => setEditListName(e.target.value)}
+                                                    className="flex-1 bg-transparent focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditingListId(null)}
+                                                    className="ml-2 text-gray-500 hover:text-gray-700"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <div
+                                            className={`flex items-center justify-between px-2 py-1 hover:bg-gray-100 
+                        ${currentList === list.name && viewState.currentView === 'todo' && list.id === lists.find(l => l.name === currentList)?.id
+                                                    ? 'bg-gray-100 relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-1 after:bg-gray-700'
+                                                    : ''}`}
+                                        >
+                                            <div
+                                                className="flex items-center flex-grow cursor-pointer"
+                                                onClick={() => {
+                                                    handleListClick(list);
+                                                    setSidebarOpen(false);
+                                                }}
+                                            >
+                                                <span className="mr-2 flex-shrink-0">
+                                                    {list.icon}
+                                                </span>
+                                                <span className="flex-grow">{list.name}</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                {/* Show Edit/Delete only for regular lists (type=0) and non-default */}
+                                                {list.type === 0 && !list.isDefault && (
+                                                    <div className="flex items-center mr-2">
+                                                        <button
+                                                            onClick={() => handleEditList(list)}
+                                                            className="p-1 text-gray-500 hover:text-blue-600"
+                                                        >
+                                                            <Edit size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteList(list.id)}
+                                                            className="p-1 text-gray-500 hover:text-red-600"
+                                                        >
+                                                            <Trash size={16} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                <span className="ml-auto">
+                                                    {getListCount(list)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </nav>
+                        <div className="border-t pt-4">
+                            {isCreatingList ? (
+                                <div className="px-2 py-1">
+                                    <div className="flex items-center bg-gray-100 rounded-lg p-2">
+                                        <input
+                                            type="text"
+                                            value={newListName}
+                                            onChange={(e) => setNewListName(e.target.value)}
+                                            placeholder="列表名称"
+                                            className="flex-grow flex-shrink min-w-0 bg-transparent focus:outline-none"
+                                            autoFocus
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleCreateList}
+                                            className="ml-2 text-gray-500 hover:text-green-600 flex-shrink-0"
+                                        >
+                                            <Check size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelCreate}
+                                            className="ml-2 text-gray-500 hover:text-green-600 flex-shrink-0"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsCreatingList(true)}
+                                    className="flex items-center text-blue-600 hover:bg-gray-100 w-full px-2 py-1 rounded-lg whitespace-nowrap"
+                                >
+                                    <Plus size={20} className="mr-2 flex-shrink-0" />
+                                    <span>新建列表</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {/* Overlay */}
+                    <div className="flex-1 bg-black opacity-50" onClick={() => setSidebarOpen(false)}></div>
                 </div>
-            </div>
+            )}
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-auto">
                 {loading ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">加载中...</div>
+                    <div className="flex-1 flex items-center justify-center">
+                        <p>Loading tasks...</p>
+                    </div>
                 ) : error ? (
-                    <div className="flex items-center justify-center h-full text-red-500">{error}</div>
-                ) : activeTab === 'home' ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <p className="text-red-500">{error}</p>
+                    </div>
+                ) : (
                     <>
-                        {/* 集成 QuadrantsUI 组件 */}
-                        <div className="w-full flex justify-center mb-4">
-                            <div className="relative" style={{ width: '100%', maxWidth: '400px' }}>
-                                <QuadrantsUI />
-                            </div>
-                        </div>
-                        {/* 任务列表 */}
-                        <TodoView
-                            tasks={tasks.filter((task) => task.list === currentList)}
-                            currentList={currentList}
-                            onAddTask={handleAddTask}
-                            onToggleComplete={toggleComplete}
-                            onToggleImportant={toggleImportant}
-                            onSortChange={handleSortChange}
-                            sortState={sortState}
-                            lists={lists}
-                        />
-                    </>
-                ) : activeTab === 'search' ? (
-                    <SearchResultsPage
-                        initialQuery={searchQuery}
-                        onBack={() => setActiveTab('home')}
-                    />
-                ) : activeTab === 'settings' ? (
-                    <SettingsPage
-                        onCancel={() => setActiveTab('home')}
-                        onSave={() => setActiveTab('home')}
-                        onSettingsChange={() => { }}
-                    />
-                ) : null}
-            </main>
-
-            {/* Bottom Navigation */}
-            <nav className="bg-white border-t border-gray-200">
-                <div className="flex justify-around">
-                    {['home', 'search', 'settings'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`p-4 flex flex-col items-center ${activeTab === tab ? 'text-blue-600' : 'text-gray-400'
-                                }`}
-                        >
-                            {tab === 'home' && (
-                                <div className="w-6 h-6 grid grid-cols-2 gap-0.5">
-                                    <div className="bg-current rounded-tl-sm"></div>
-                                    <div className="bg-current rounded-tr-sm"></div>
-                                    <div className="bg-current rounded-bl-sm"></div>
-                                    <div className="bg-current rounded-br-sm"></div>
-                                </div>
-                            )}
-                            {tab === 'search' && <Search size={24} />}
-                            {tab === 'settings' && <Settings size={24} />}
-                            <span className="mt-1 text-xs">{tab === 'home' ? '主页' : tab === 'search' ? '搜索' : '设置'}</span>
-                        </button>
-                    ))}
-                </div>
-            </nav>
-
-            {/* Sidebar */}
-            <div
-                className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 ease-in-out ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
-                onClick={() => setIsSidebarOpen(false)}
-            >
-                <div
-                    className={`bg-white h-full w-[70%] shadow-lg transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                        }`}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="p-4 flex justify-between items-center bg-blue-600 text-white">
-                        <h2 className="text-xl font-bold">To Do</h2>
-                        <button onClick={() => setIsSidebarOpen(false)}>
-                            <X size={24} />
-                        </button>
-                    </div>
-                    {/* Sidebar content */}
-                    <nav className="mt-4 flex-1">
-                        {lists.map((list) => (
-                            <div key={list.id} className="relative group">
-                                {editingListId === list.id ? (
-                                    <div className="px-4 py-2">
-                                        <div className="flex items-center bg-gray-100 rounded-lg p-2">
-                                            <input
-                                                type="text"
-                                                value={editListName}
-                                                onChange={(e) => setEditListName(e.target.value)}
-                                                className="flex-1 bg-transparent focus:outline-none"
-                                                autoFocus
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={handleUpdateList}
-                                                className="ml-2 text-gray-500 hover:text-green-600"
-                                            >
-                                                <Check size={16} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingListId(null)}
-                                                className="ml-2 text-gray-500 hover:text-gray-700"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div
-                                        className={`flex items-center justify-between px-4 py-2 hover:bg-gray-100 ${currentList === list.name ? 'bg-gray-100' : ''
-                                            }`}
-                                    >
-                                        <div
-                                            className="flex items-center flex-grow cursor-pointer"
-                                            onClick={() => handleListClick(list.name)}
-                                        >
-                                            <span className="mr-2 flex-shrink-0">{list.icon}</span>
-                                            <span className="flex-grow">{list.name}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            {!list.isDefault && (
-                                                <div className="flex items-center">
-                                                    <button
-                                                        onClick={() => handleEditList(list)}
-                                                        className="p-1 text-gray-500 hover:text-blue-600"
-                                                    >
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteList(list.id)}
-                                                        className="p-1 text-gray-500 hover:text-red-600"
-                                                    >
-                                                        <Trash size={16} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                            <span className="ml-auto">
-                                                {getListCount(list.name)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </nav>
-                    <div className="p-4 border-t">
-                        {isCreatingList ? (
-                            <div className="px-4 py-2">
-                                <div className="flex items-center bg-gray-100 rounded-lg p-2">
-                                    <input
-                                        type="text"
-                                        value={newListName}
-                                        onChange={(e) => setNewListName(e.target.value)}
-                                        placeholder="列表名称"
-                                        className="flex-1 bg-transparent focus:outline-none"
-                                        autoFocus
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleCreateList}
-                                        className="ml-2 text-gray-500 hover:text-green-600"
-                                    >
-                                        <Check size={16} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleCancelCreate}
-                                        className="ml-2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            </div>
+                        {viewState.currentView === 'todo' ? (
+                            <TodoView
+                                tasks={tasks} // Ensure this reflects the current list
+                                currentList={currentList}
+                                onAddTask={handleAddTask}
+                                onToggleComplete={toggleComplete}
+                                onSortChange={handleSortChange}
+                                sortState={sortState}
+                                lists={lists as jcefBridge.List[]}
+                            />
+                        ) : viewState.currentView === 'settings' ? (
+                            <SettingsPage
+                                onCancel={handleSettingsCancel}
+                                onSave={handleSettingsSave}
+                                onSettingsChange={handleSettingsChange}
+                            />
+                        ) : viewState.currentView === 'searchResults' ? (
+                            <SearchResultsPage
+                                searchQuery={searchQuery}
+                                onBack={handleBackFromSearch}
+                            />
                         ) : (
-                            <button
-                                onClick={() => setIsCreatingList(true)}
-                                className="flex items-center text-blue-600 hover:bg-gray-100 w-full px-4 py-2 rounded-lg whitespace-nowrap"
-                            >
-                                <Plus size={20} className="mr-2 flex-shrink-0" />
-                                <span>新建列表</span>
-                            </button>
+                            <QuadrantsUI />
                         )}
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
-        </div>
-    );
-}
+
+            {/* Bottom Navigation Bar */}
+            <footer className="bg-white shadow p-2 flex justify-around">
+                <button
+                    onClick={() => {
+                        setViewState(() => ({
+                            currentView: 'quadrants',
+                            previousList: currentList
+                        }));
+                    }}
+                    className={`flex flex-col items-center text-sm ${viewState.currentView === 'quadrants' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
+                        }`}
+                >
+                    <div className="grid grid-cols-2 gap-0.5">
+                        <div className="w-4 h-4 bg-current rounded-sm"></div>
+                        <div className="w-4 h-4 bg-current rounded-sm"></div>
+                        <div className="w-4 h-4 bg-current rounded-sm"></div>
+                        <div className="w-4 h-4 bg-current rounded-sm"></div>
+                    </div>
+                    <span className="mt-1">象限</span>
+                </button>
+                <button
+                    onClick={() => setViewState(() => ({
+                        currentView: 'searchResults',
+                        previousList: currentList
+                    }))}
+                    className={`flex flex-col items-center text-sm ${viewState.currentView === 'searchResults' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
+                        }`}
+                >
+                    <Search size={20} />
+                    <span className="mt-1">搜索</span>
+                </button>
+                <button
+                    onClick={handleSettingsClick}
+                    className={`flex flex-col items-center text-sm ${viewState.currentView === 'settings' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
+                        }`}
+                >
+                    <Settings size={20} />
+                    <span className="mt-1">设置</span>
+                </button>
+            </footer>
+        </div>);
+};
+
+export default MobileTodoApp;
