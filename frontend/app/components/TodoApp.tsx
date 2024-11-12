@@ -67,9 +67,15 @@ export default function TodoApp() {
             if (selectedList.type === 3) { // History List
                 setTasks(allTasks.filter(task => task.completed));
             } else if (selectedList.type === 2) { // Sorted List
-                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
+                setTasks(allTasks.filter(task =>
+                    !task.completed &&
+                    task.list_id === selectedList.id
+                ));
             } else { // Regular List
-                setTasks(allTasks.filter(task => !task.completed && task.list_id === selectedList.id));
+                setTasks(allTasks.filter(task =>
+                    !task.completed &&
+                    task.list_id === selectedList.id
+                ));
             }
         } else {
             setTasks(allTasks.filter(task => !task.completed));
@@ -172,16 +178,24 @@ export default function TodoApp() {
                     ...taskToUpdate,
                     completed: !taskToUpdate.completed
                 });
+
+                // 更新 allTasks
                 setAllTasks(allTasks.map(task => task.id === id ? updatedTask : task));
-                if (updatedTask.list === currentList || currentList === '历史') { // Support auto-display for History List
-                    if (currentList === '历史') {
+
+                // 更新当前显示的任务列表
+                const selectedList = lists.find(list => list.name === currentList);
+                if (selectedList) {
+                    if (selectedList.type === 3) { // History List
                         if (updatedTask.completed) {
                             setTasks(prevTasks => [...prevTasks, updatedTask]);
                         } else {
                             setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
                         }
                     } else {
-                        setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+                        // 对于非历史列表，直接移除已完成的任务
+                        if (updatedTask.completed) {
+                            setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+                        }
                     }
                 }
             }
@@ -319,7 +333,10 @@ export default function TodoApp() {
         if (list.type === 3) { // History List
             return allTasks.filter(task => task.completed).length;
         }
-        return allTasks.filter(task => task.list_id === list.id).length;
+        // 对于普通列表和排序列表，只计算未完成的任务
+        return allTasks.filter(task =>
+            task.list_id === list.id && !task.completed
+        ).length;
     };
 
 
@@ -369,9 +386,15 @@ export default function TodoApp() {
         if (list.type === 3) { // History List
             setTasks(allTasks.filter(task => task.completed));
         } else if (list.type === 2) { // Sorted List
-            setTasks(allTasks.filter(task => task.list_id === list.id));
+            setTasks(allTasks.filter(task =>
+                !task.completed &&
+                task.list_id === list.id
+            ));
         } else { // Regular List
-            setTasks(allTasks.filter(task => task.list_id === list.id));
+            setTasks(allTasks.filter(task =>
+                !task.completed &&
+                task.list_id === list.id
+            ));
         }
     };
 
