@@ -10,8 +10,10 @@ public class RankingList {
     public RankingList() {
     }
 
+    // 供数据库调用的函数
+    // 每次数据库产生了变化，则调用这个函数完成对order表的更新
     public static JSONArray addRankingList() {
-        // 先清楚上一次的缓存
+        // 先清除上一次的缓存
         TodoSQLiteManager todoSQLiteManager = new TodoSQLiteManager();
         todoSQLiteManager.deleteOrder();
         // 从数据库中获取数据

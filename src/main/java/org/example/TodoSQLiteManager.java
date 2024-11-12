@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class TodoSQLiteManager {
     private static final String DB_URL = "jdbc:sqlite:todos.db";
+    private RankingList rankingList = new RankingList();
 
     static {
         try {
@@ -220,6 +221,7 @@ public class TodoSQLiteManager {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         todoJson.put("id", generatedKeys.getInt(1));
+                        updateOrderList();
                         return todoJson;
                     }
                 }
@@ -243,6 +245,7 @@ public class TodoSQLiteManager {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
+                updateOrderList();
                 return todoJson;
             }
         } catch (SQLException e) {
@@ -273,6 +276,8 @@ public class TodoSQLiteManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        updateOrderList();
+        return;
     }
 
     public ArrayList<DataItem> getAllTodos(int i) {
@@ -403,5 +408,9 @@ public class TodoSQLiteManager {
         sortedList.put("icon", "🔢");
         sortedList.put("type", 2);
         addList(sortedList);
+    }
+
+    public void updateOrderList() {
+        rankingList.addRankingList();
     }
 }
