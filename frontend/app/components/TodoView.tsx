@@ -14,7 +14,7 @@ interface TodoViewProps {
 
 interface SortOption {
     label: string;
-    value: 'importance' | 'dueDate' | 'alphabetical';
+    value: 'importance' | 'dueDate' | 'alphabetical' | 'default';
 }
 
 interface SortState {
@@ -112,8 +112,13 @@ const TodoView: React.FC<TodoViewProps> = ({
         const labels = {
             importance: '重要性',
             dueDate: '到期日',
-            alphabetical: '字母顺序'
+            alphabetical: '字母顺序',
+            default: '默认'
         };
+        // 对于默认排序，不显示箭头
+        if (sortState.criteria === 'default') {
+            return labels[sortState.criteria];
+        }
         return `${labels[sortState.criteria]} ${sortState.direction === 'asc' ? '↑' : '↓'}`;
     };
 
@@ -136,7 +141,13 @@ const TodoView: React.FC<TodoViewProps> = ({
                             ref={sortMenuRef}
                             className="absolute bg-white border rounded shadow-lg"
                             style={{ top: `${sortMenuPosition.top}px`, left: `${sortMenuPosition.left}px` }}
+                        >        <button
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            onClick={(e) => handleSortOptionSelect('default', e)}
+                            disabled={currentList === '历史'}
                         >
+                                默认排序
+                            </button>
                             <button
                                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                                 onClick={(e) => handleSortOptionSelect('importance', e)}

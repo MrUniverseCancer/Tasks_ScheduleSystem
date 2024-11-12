@@ -25,7 +25,7 @@ interface List extends Omit<jcefBridge.List, 'icon'> {
 
 interface SortOption {
     label: string;
-    value: 'importance' | 'dueDate' | 'alphabetical';
+    value: 'importance' | 'dueDate' | 'alphabetical' | 'default';
 }
 
 interface SortState {
@@ -197,6 +197,13 @@ export default function TodoApp() {
 
     const handleSortChange = async (criteria: SortOption['value']) => {
         try {
+            if (criteria === 'default') {
+                // 从后端重新加载原始数据
+                await loadTasks();
+                setSortState({ criteria, direction: 'desc' }); // 设置为默认排序状态
+                return;
+            }
+
             const newDirection = sortState.criteria === criteria && sortState.direction === 'desc' ? 'asc' : 'desc';
             const sortedAllTasks = await jcefBridge.sortTodos(criteria, newDirection);
             setAllTasks(sortedAllTasks);
