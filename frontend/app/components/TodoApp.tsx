@@ -55,10 +55,12 @@ export default function TodoApp() {
     const [searchQuery, setSearchQuery] = useState('');
     const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
     const [lists, setLists] = useState<List[]>([]);
+    const [rankedTodos, setRankedTodos] = useState<JcefTodo[]>([]);
 
     useEffect(() => {
         loadLists();
         loadTasks();
+        refreshRankedTodos();
     }, []);
 
     useEffect(() => {
@@ -67,10 +69,8 @@ export default function TodoApp() {
             if (selectedList.type === 3) { // History List
                 setTasks(allTasks.filter(task => task.completed));
             } else if (selectedList.type === 2) { // Sorted List
-                setTasks(allTasks.filter(task =>
-                    !task.completed &&
-                    task.list_id === selectedList.id
-                ));
+                refreshRankedTodos();
+                setTasks(rankedTodos);
             } else { // Regular List
                 setTasks(allTasks.filter(task =>
                     !task.completed &&
@@ -80,7 +80,16 @@ export default function TodoApp() {
         } else {
             setTasks(allTasks.filter(task => !task.completed));
         }
-    }, [currentList, allTasks, lists]);
+    }, [currentList, allTasks, lists, rankedTodos]);
+
+    const refreshRankedTodos = async () => {
+        try {
+            const loadedRankedTodos = await jcefBridge.getRankedTodos();
+            setRankedTodos(loadedRankedTodos);
+        } catch (err) {
+            setError('Failed to load ranked tasks: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
+        }
+    };
 
 
     const loadLists = async () => {
@@ -123,7 +132,8 @@ export default function TodoApp() {
                 if (selectedList.type === 3) { // History List
                     setTasks(loadedTasks.filter(task => task.completed));
                 } else if (selectedList.type === 2) { // Sorted List
-                    setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
+                    refreshRankedTodos();
+                    setTasks(rankedTodos);
                 } else { // Regular List
                     setTasks(loadedTasks.filter(task => task.list_id === selectedList.id));
                 }
@@ -168,6 +178,7 @@ export default function TodoApp() {
                 setError('Failed to add task: An unknown error occurred');
             }
         }
+        await refreshRankedTodos();
     };
 
     const toggleComplete = async (id: number) => {
@@ -206,6 +217,7 @@ export default function TodoApp() {
                 setError('Failed to update task: An unknown error occurred');
             }
         }
+        await refreshRankedTodos();
     };
 
 
@@ -241,6 +253,7 @@ export default function TodoApp() {
                 setError('Failed to sort tasks: An unknown error occurred');
             }
         }
+        await refreshRankedTodos();
     };
 
     const handleCreateList = async () => {
@@ -290,6 +303,7 @@ export default function TodoApp() {
                 setError('Failed to update list: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
             }
         }
+        await refreshRankedTodos();
     };
 
     const handleDeleteList = async (listId: number) => {
@@ -309,6 +323,7 @@ export default function TodoApp() {
         } catch (err) {
             setError('Failed to delete list: ' + (err instanceof Error ? err.message : 'An unknown error occurred'));
         }
+        await refreshRankedTodos();
     };
 
 
@@ -333,7 +348,10 @@ export default function TodoApp() {
         if (list.type === 3) { // History List
             return allTasks.filter(task => task.completed).length;
         }
-        // 对于普通列表和排序列表，只计算未完成的任务
+        else if (list.type === 2) { // Sorted List
+            return rankedTodos.length;
+        }
+        // 对于普通列表，只计算未完成的任务
         return allTasks.filter(task =>
             task.list_id === list.id && !task.completed
         ).length;
@@ -386,10 +404,8 @@ export default function TodoApp() {
         if (list.type === 3) { // History List
             setTasks(allTasks.filter(task => task.completed));
         } else if (list.type === 2) { // Sorted List
-            setTasks(allTasks.filter(task =>
-                !task.completed &&
-                task.list_id === list.id
-            ));
+            refreshRankedTodos();
+            setTasks(rankedTodos);
         } else { // Regular List
             setTasks(allTasks.filter(task =>
                 !task.completed &&

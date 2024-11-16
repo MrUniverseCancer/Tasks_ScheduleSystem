@@ -132,7 +132,7 @@ const TodoView: React.FC<TodoViewProps> = ({
                         ref={sortButtonRef}
                         className="p-2 flex items-center"
                         onClick={handleSortClick}
-                        disabled={currentList === '历史'} // Disable sorting for History List
+                        disabled={currentList === '历史' || lists.find(list => list.name === currentList)?.type === 2} // Disable sorting for History List
                     >
                         排序 ({getSortLabel()}) <ChevronDown size={16} className="ml-1" />
                     </button>

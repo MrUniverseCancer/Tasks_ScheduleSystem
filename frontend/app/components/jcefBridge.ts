@@ -88,3 +88,6 @@ export const searchTodos = async (query: string): Promise<Todo[]> => {
     return callBridge<Todo[]>('searchTodos', {query});
 };
 
+export const getRankedTodos = async (): Promise<Todo[]> => {
+    return callBridge<Todo[]>('getRankedTodos');
+};
