@@ -41,6 +41,12 @@ public class DataItem {
         // 获取两者的差值
         // 返回差值
         // 定义日期格式
+//        System.out.println(dueDate);
+        // 处理为空的情况
+        if(dueDate == null) {
+            // 默认返回30天
+            return 30;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         // 解析输入的截止日期
